@@ -13,19 +13,24 @@
             <groupId>smartfox</groupId>
             <artifactId>sfs2x-client-core</artifactId>
             <version>1.0.1</version>
-            <scope>provided</scope>
+            <scope>system</scope>
+    		<systemPath>${project.basedir}/lib/sfs2x.jar</systemPath>
         </dependency>
 
         <dependency>
             <groupId>smartfox</groupId>
             <artifactId>sfs2x-api</artifactId>
             <version>1.0.1</version>
+            <scope>system</scope>
+    		<systemPath>${project.basedir}/lib/SFS2X_API_Java.jar</systemPath>
         </dependency>
 
         <dependency>
             <groupId>smartfox</groupId>
-            <artifactId>sfs2x-server</artifactId>
+            <artifactId>sfs2x-core</artifactId>
             <version>1.0.1</version>
+            <scope>system</scope>
+    		<systemPath>${project.basedir}/lib/sfs2x-core.jar</systemPath>
         </dependency>
 		
         <dependency>
@@ -149,7 +154,7 @@
                     </execution>
                 </executions>
             </plugin-->
-    
+    <!-- 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
@@ -241,8 +246,10 @@
                     </execution>
                 </executions>
             </plugin>
-
+ -->
         </plugins>
+        
+        
     </build>
 
 
