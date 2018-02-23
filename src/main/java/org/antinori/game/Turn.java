@@ -23,6 +23,9 @@ import javax.swing.JPanel;
 import org.antinori.astar.Location;
 import org.antinori.multiplayer.MultiplayerFrame;
 
+import cis579.ai.AiPlayer;
+import cis579.ai.Solution;
+
 public class Turn {
 
     public BufferedImage green_background = ClueMain.loadIcon("green-pattern-cropped.jpg");
@@ -35,7 +38,7 @@ public class Turn {
 
     public boolean gameOver = false;
     public boolean multiplayerGotShowCardResponse = false;
-
+    
     public Turn() {
 
     }
@@ -179,13 +182,19 @@ public class Turn {
 
     public Location clickOnMapComputerPlayer(Player player) {
 
-        Location new_location = null;
+        int roll = ClueMain.mapView.rollDice();
 
 		// try move the player to the room which is not in their cards or
         // toggled
         Location location = player.getLocation();
         boolean isInRoom = location.getRoomId() != -1;
-
+        
+        ArrayList<Location> choices = ClueMain.map.highlightReachablePaths(location, ClueMain.pathfinder, roll);
+        ClueMain.mapView.repaint();
+        
+        Location new_location = AiPlayer.decideLocation(choices);
+        
+        /*
         // get all other rooms except the one they are in
         ArrayList<Location> rooms = ClueMain.map.getAllRoomLocations(location.getRoomId());
 
@@ -197,8 +206,6 @@ public class Turn {
                 it.remove();
             }
         }
-
-        int roll = ClueMain.mapView.rollDice();
 
         do {
             if (isInRoom) {
@@ -249,9 +256,6 @@ public class Turn {
 
             }
 
-            ArrayList<Location> choices = ClueMain.map.highlightReachablePaths(location, ClueMain.pathfinder, roll);
-            ClueMain.mapView.repaint();
-
 			// see if they can move to a highlighted room which is not in their
             // hand or toggled
             for (Location choice : choices) {
@@ -277,11 +281,13 @@ public class Turn {
             }
 
         } while (false);
-
+		*/
+	
 //		System.out.println(player.toLongString() + " rolled a " + roll);
 //		System.out.println("clickOnMapComputerPlayer rooms size = " + rooms.size());
 //		System.out.println("clickOnMapComputerPlayer location = " + new_location);
 //		System.out.println("clickOnMapComputerPlayer " + player.getNotebook().toString());
+        
         if (new_location == null) {
             new_location = location;// just keep them in the same room then
             JOptionPane.showMessageDialog(ClueMain.frame, player.toString() + " is staying in the same room.", "", JOptionPane.PLAIN_MESSAGE);
@@ -298,13 +304,21 @@ public class Turn {
 
     }
 
+    /**
+     * computer player turn for making a suggestion
+     * 
+     * @param player
+     * @param players
+     */
     public void makeSuggestionComputerPlayer(Player player, ArrayList<Player> players) {
 
         Location location = player.getLocation();
         if (location.getRoomId() == -1) {
+        	// can't make a suggestion if you're not in a room
             return;
         }
-
+        
+        /*        
         Card selected_suspect_card = player.getNotebook().randomlyPickCardOfType(TYPE_SUSPECT);
         Card selected_weapon_card = player.getNotebook().randomlyPickCardOfType(TYPE_WEAPON);
 
@@ -315,7 +329,14 @@ public class Turn {
         suggestion.add(selected_suspect_card);
         suggestion.add(selected_room_card);
         suggestion.add(selected_weapon_card);
-
+        */
+        
+        Solution aiSuggestion = AiPlayer.getSuggestion();
+        ArrayList<Card> suggestion = new ArrayList<Card>();
+        suggestion.add(aiSuggestion.suspect);
+        suggestion.add(aiSuggestion.room);
+        suggestion.add(aiSuggestion.weapon);
+        
         ClueMain.showcards.setSuggestion(suggestion, player, ClueMain.yourPlayer, players);
         ClueMain.showcards.showCards();
 
@@ -367,7 +388,7 @@ public class Turn {
             Location new_location = null;
             do {
                 try {
-                    Thread.currentThread().sleep(1000);
+                	Thread.currentThread().sleep(1000);
                     new_location = player.getLocation();
                 } catch (Exception e) {
                 }

@@ -81,7 +81,7 @@ public class Location implements Node<Location>, Serializable {
     public boolean isRoom() {
         return isRoom;
     }
-
+    
     public void setRoomId(int id) {
         this.roomId = id;
     }

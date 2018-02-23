@@ -16,6 +16,9 @@ import org.antinori.astar.Location;
 
 import com.smartfoxserver.v2.protocol.serialization.SerializableSFSType;
 
+import cis579.ai.AiPlayer;
+import cis579.ai.Solution;
+
 public class Notebook implements SerializableSFSType {
 
     private Player player;
@@ -83,7 +86,22 @@ public class Notebook implements SerializableSFSType {
     }
 
     public ArrayList<Card> canMakeAccusation() {
-        ArrayList<Card> accusation = new ArrayList<Card>();
+    	
+    	ArrayList<Card> accusation = new ArrayList<Card>();
+    	
+    	// check if AI player can make an accusation
+    	if(player.isComputerPlayer()) {
+    		Solution s = AiPlayer.canMakeAccusation();
+    		if(s == null) {
+    			return null;
+    		}
+    		
+    		accusation.add(s.suspect);
+    		accusation.add(s.room);
+    		accusation.add(s.weapon);
+    		
+    		return accusation;
+    	}
 
         int count = 0;
         for (int i = 0; i < NUM_SUSPECTS; i++) {

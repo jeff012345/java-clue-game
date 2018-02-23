@@ -85,6 +85,9 @@ public class ShowCardsRoutine {
 
     }
 
+    /**
+     * shows cards from another player for a suggestion
+     */
     public void showCards() {
 
         if (players == null) {

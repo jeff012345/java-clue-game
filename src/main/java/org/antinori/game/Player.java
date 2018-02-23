@@ -147,5 +147,9 @@ public class Player implements SerializableSFSType {
     public void setHasMadeFalseAccusation() {
         hasMadeFalseAccusation = true;
     }
+    
+    public boolean isInARoom() {
+    	return this.playerLocation.getRoomId() != -1;
+    }
 
 }
