@@ -24,6 +24,8 @@ import javax.swing.JTextArea;
 
 import org.antinori.astar.Location;
 
+import cis579.ai.AiPlayerManager;
+
 public class ShowCardsRoutine {
 
     ArrayList<Card> suggestion = null;
@@ -50,6 +52,11 @@ public class ShowCardsRoutine {
             }
             if (card.getType() == TYPE_ROOM) {
                 room = card;
+                if(suggesting_player.getLocation().getRoomId() != card.getValue()) {
+                	throw new RuntimeException("Player suggested card but they are not in that room!! Room = " 
+                			+ suggesting_player.getLocation().getRoomId()
+                			+ ", Guess = " + card.getValue());
+                }
             }
         }
 
@@ -163,6 +170,10 @@ public class ShowCardsRoutine {
         if (card_to_show == null) {
             ShowCardDialog2 dialog = new ShowCardDialog2("No one has a\ncard to show.");
             dialog.setVisible(true);
+            
+            if (suggesting_player.isComputerPlayer()) {
+            	AiPlayerManager.noCardsToShow(this.suggesting_player, suggestion);
+            }
         } else {
             //set the card as toggled in their notebook
             if (suggesting_player.isComputerPlayer()) {

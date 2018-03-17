@@ -23,7 +23,7 @@ import javax.swing.JPanel;
 import org.antinori.astar.Location;
 import org.antinori.multiplayer.MultiplayerFrame;
 
-import cis579.ai.AiPlayer;
+import cis579.ai.AiPlayerManager;
 import cis579.ai.Solution;
 
 public class Turn {
@@ -59,14 +59,14 @@ public class Turn {
 
                 if (player.isComputerPlayer()) {
 
-                    Location new_location = clickOnMapComputerPlayer(player);
-                    // let them make a suggestion
-                    makeSuggestionComputerPlayer(player, players);
-
-                    if (canMakeAccusationComputerPlayer(player)) {
+                	if (canMakeAccusationComputerPlayer(player)) {
                         gameOver = true;
                         break;
                     }
+                	
+                    clickOnMapComputerPlayer(player);
+                    // let them make a suggestion
+                    makeSuggestionComputerPlayer(player, players);
 
                 } else {
 					// dialog for showing roll dice button, take secret passage
@@ -181,18 +181,37 @@ public class Turn {
     }
 
     public Location clickOnMapComputerPlayer(Player player) {
+    	
+    	Location new_location = null;
+    	int roll = -1;
+    	
+    	if(AiPlayerManager.shouldRoll(player)) {
+            roll = ClueMain.mapView.rollDice();
 
-        int roll = ClueMain.mapView.rollDice();
+    		// try move the player to the room which is not in their cards or toggled 
+            Location location = player.getLocation();
+            
+            ArrayList<Location> choices = ClueMain.map.highlightReachablePaths(location, ClueMain.pathfinder, roll);
+            ClueMain.mapView.repaint();
+            
+            new_location = AiPlayerManager.decideLocation(player, choices);
+    	}
+    	
+    	 if (new_location == null) {
+             new_location = player.getLocation();// just keep them in the same room then
+             JOptionPane.showMessageDialog(ClueMain.frame, player.toString() + " is staying in the same room.", "", JOptionPane.PLAIN_MESSAGE);
 
-		// try move the player to the room which is not in their cards or
-        // toggled
-        Location location = player.getLocation();
-        boolean isInRoom = location.getRoomId() != -1;
-        
-        ArrayList<Location> choices = ClueMain.map.highlightReachablePaths(location, ClueMain.pathfinder, roll);
-        ClueMain.mapView.repaint();
-        
-        Location new_location = AiPlayer.decideLocation(choices);
+         } else {
+
+             ClueMain.setPlayerLocationFromMapClick(new_location);
+             JOptionPane.showMessageDialog(ClueMain.frame, player.toString() + " rolled a " 
+             		+ roll 
+             		+ (new_location == player.getLocation() ? " has stayed in the room." : " and has moved."), "", JOptionPane.PLAIN_MESSAGE);
+             ClueMain.mapView.repaint();
+             ClueMain.map.resetHighlights();
+         }
+
+         return new_location;
         
         /*
         // get all other rooms except the one they are in
@@ -288,19 +307,7 @@ public class Turn {
 //		System.out.println("clickOnMapComputerPlayer location = " + new_location);
 //		System.out.println("clickOnMapComputerPlayer " + player.getNotebook().toString());
         
-        if (new_location == null) {
-            new_location = location;// just keep them in the same room then
-            JOptionPane.showMessageDialog(ClueMain.frame, player.toString() + " is staying in the same room.", "", JOptionPane.PLAIN_MESSAGE);
-
-        } else {
-
-            ClueMain.setPlayerLocationFromMapClick(new_location);
-            JOptionPane.showMessageDialog(ClueMain.frame, player.toString() + " rolled a " + roll + (new_location == location ? " has stayed in the room." : " and has moved."), "", JOptionPane.PLAIN_MESSAGE);
-            ClueMain.mapView.repaint();
-            ClueMain.map.resetHighlights();
-        }
-
-        return new_location;
+       
 
     }
 
@@ -318,20 +325,7 @@ public class Turn {
             return;
         }
         
-        /*        
-        Card selected_suspect_card = player.getNotebook().randomlyPickCardOfType(TYPE_SUSPECT);
-        Card selected_weapon_card = player.getNotebook().randomlyPickCardOfType(TYPE_WEAPON);
-
-        // the room they are in
-        Card selected_room_card = new Card(TYPE_ROOM, location.getRoomId());
-
-        ArrayList<Card> suggestion = new ArrayList<Card>();
-        suggestion.add(selected_suspect_card);
-        suggestion.add(selected_room_card);
-        suggestion.add(selected_weapon_card);
-        */
-        
-        Solution aiSuggestion = AiPlayer.getSuggestion();
+        Solution aiSuggestion = AiPlayerManager.getSuggestion(player);
         ArrayList<Card> suggestion = new ArrayList<Card>();
         suggestion.add(aiSuggestion.suspect);
         suggestion.add(aiSuggestion.room);
@@ -339,7 +333,6 @@ public class Turn {
         
         ClueMain.showcards.setSuggestion(suggestion, player, ClueMain.yourPlayer, players);
         ClueMain.showcards.showCards();
-
     }
 
     public boolean canMakeAccusationComputerPlayer(Player player) {

@@ -149,7 +149,7 @@ public class Location implements Node<Location>, Serializable {
 
     @Override
     public String toString() {
-        return "Location [" + x + "][" + y + "]";
+        return "Location [" + x + "][" + y + "]; Room = " + (isRoom ? getRoomCard().toString() : roomId);
     }
 
 }

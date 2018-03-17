@@ -16,14 +16,17 @@ import org.antinori.astar.Location;
 
 import com.smartfoxserver.v2.protocol.serialization.SerializableSFSType;
 
-import cis579.ai.AiPlayer;
+import cis579.ai.AiPlayerManager;
+import cis579.ai.ShownCardListener;
 import cis579.ai.Solution;
 
 public class Notebook implements SerializableSFSType {
 
     private Player player;
     private LinkedHashMap<Card, Entry> entries = new LinkedHashMap<Card, Entry>();
-
+    
+    private ShownCardListener shownCardListener = null;;
+    
     public Notebook(Player player) {
         this.setPlayer(player);
 
@@ -47,12 +50,19 @@ public class Notebook implements SerializableSFSType {
             Entry entry = entries.get(card);
             entry.setInHand(true);
         }
-
+    }
+    
+    public void setShownCardListener(ShownCardListener listener) {
+    	this.shownCardListener = listener;
     }
 
     public void setToggled(Card card) {
         Entry entry = entries.get(card);
         entry.setToggled(!entry.getToggled());
+        
+        if(this.shownCardListener != null) {
+        	this.shownCardListener.onShownCard(card);
+        }
     }
 
     public boolean isCardInHand(Card card) {
@@ -91,7 +101,7 @@ public class Notebook implements SerializableSFSType {
     	
     	// check if AI player can make an accusation
     	if(player.isComputerPlayer()) {
-    		Solution s = AiPlayer.canMakeAccusation();
+    		Solution s = AiPlayerManager.canMakeAccusation(player);
     		if(s == null) {
     			return null;
     		}
@@ -208,7 +218,7 @@ public class Notebook implements SerializableSFSType {
         this.player = player;
     }
 
-    class Entry implements SerializableSFSType {
+    public static class Entry implements SerializableSFSType {
 
         Card value;
         boolean inHand = false;

@@ -11,6 +11,8 @@ import org.antinori.multiplayer.DealRequestHandler;
 
 import com.smartfoxserver.v2.entities.data.SFSObject;
 
+import cis579.ai.AiPlayerManager;
+
 public class Clue extends SFSObject {
 
     private ArrayList<Player> players = new ArrayList<Player>(6);

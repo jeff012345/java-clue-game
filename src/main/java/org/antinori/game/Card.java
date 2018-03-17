@@ -3,7 +3,7 @@ package org.antinori.game;
 
 import com.smartfoxserver.v2.protocol.serialization.SerializableSFSType;
 
-public class Card implements SerializableSFSType {
+public class Card implements SerializableSFSType, Comparable<Card> {
 
     public Card() {
     }
@@ -60,6 +60,11 @@ public class Card implements SerializableSFSType {
     public static final Card peacock = new Card(TYPE_SUSPECT, SUSPECT_PEACOCK);
     public static final Card white = new Card(TYPE_SUSPECT, SUSPECT_WHITE);
 
+    public static final Card KITCHEN = new Card(TYPE_ROOM, ROOM_KITCHEN);
+    public static final Card LOUNGE = new Card(TYPE_ROOM, ROOM_LOUNGE);
+    public static final Card CONSERVATORY = new Card(TYPE_ROOM, ROOM_CONSERVATORY);
+    public static final Card STUDY = new Card(TYPE_ROOM, ROOM_STUDY);
+    
     public Card(int type, int value) {
         this.type = type;
         this.value = value;
@@ -89,6 +94,9 @@ public class Card implements SerializableSFSType {
 
     @Override
     public boolean equals(Object obj) {
+    	if(obj == this)
+    		return true;
+    	
         if (obj instanceof Card) {
             Card c = (Card) obj;
             return (c.type == this.type && c.value == this.value);
@@ -185,5 +193,21 @@ public class Card implements SerializableSFSType {
         return desc;
 
     }
+
+	public int compareTo(Card arg0) {
+		if(this.getType() < arg0.getType())
+			return -1;
+		
+		if(this.getType() > arg0.getType())
+			return 1;
+			
+		if(this.getValue() < arg0.getValue())
+			return -1;
+		
+		if(this.getValue() > arg0.getValue())
+			return 1;
+		
+		return 0;
+	}
 
 }

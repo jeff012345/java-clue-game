@@ -2,10 +2,13 @@ package org.antinori.game;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.antinori.astar.Location;
 
 import com.smartfoxserver.v2.protocol.serialization.SerializableSFSType;
+
+import cis579.ai.AiPlayerManager;
 
 public class Player implements SerializableSFSType {
 
@@ -13,7 +16,12 @@ public class Player implements SerializableSFSType {
     private String suspectName = null;
     private String playerName = "";
     private Card playerCard = null;
+    
     private ArrayList<Card> cardsInHand = new ArrayList<Card>();
+    private ArrayList<Card> weapons = new ArrayList<Card>();
+    private ArrayList<Card> rooms = new ArrayList<Card>();
+    private ArrayList<Card> suspects = new ArrayList<Card>();
+    
     private boolean computerPlayer = false;
     private Location playerLocation = null;
     private Notebook notebook = null;
@@ -58,10 +66,34 @@ public class Player implements SerializableSFSType {
 
     public void addCard(Card card) {
         cardsInHand.add(card);
+        
+        switch(card.getType()) {
+        case Card.TYPE_ROOM:
+        	rooms.add(card);
+        	break;
+        case Card.TYPE_WEAPON:
+        	weapons.add(card);
+        	break;
+        case Card.TYPE_SUSPECT:
+        	suspects.add(card);
+        	break;
+        }
     }
 
     public ArrayList<Card> getCardsInHand() {
         return cardsInHand;
+    }
+    
+    public List<Card> getRooms(){
+    	return this.rooms;
+    }
+    
+    public List<Card> getWeapons(){
+    	return this.rooms;
+    }
+    
+    public List<Card> getSuspects(){
+    	return this.rooms;
     }
 
     public boolean isCardInHand(Card card) {

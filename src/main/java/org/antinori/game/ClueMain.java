@@ -43,6 +43,8 @@ import org.antinori.astar.PathFinder;
 import org.antinori.astar.RoomIconPlacement;
 import org.antinori.multiplayer.MultiplayerFrame;
 
+import cis579.ai.AiPlayerManager;
+
 public class ClueMain {
 
     public static Clue clue;
@@ -246,6 +248,8 @@ public class ClueMain {
                     player.setLocation(peacock_location);
                     break;
             }
+            
+            AiPlayerManager.addPlayer(player);
         }
 
         mapView.repaint();

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 public class ClueMap implements Serializable {
@@ -99,7 +100,7 @@ public class ClueMap implements Serializable {
 
     public Location getRoomLocation(int room_id) {
         Location room = null;
-        Collection<Location> locations = new ArrayList<Location>();
+        
         for (int i = 0; i < nodes.length; i++) {
             for (int j = 0; j < nodes[0].length; j++) {
                 if (nodes[i][j].getRoomId() == room_id) {
@@ -111,6 +112,10 @@ public class ClueMap implements Serializable {
         return room;
     }
 
+    /**
+     * @param exclusion
+     * @return all room location objects expect the exclusion
+     */
     public ArrayList<Location> getAllRoomLocations(int exclusion) {
         ArrayList<Location> rooms = new ArrayList<Location>(9);
         for (int i = 0; i < nodes.length; i++) {
@@ -126,6 +131,26 @@ public class ClueMap implements Serializable {
         return rooms;
     }
 
+    /**
+     * @param exclusion
+     * @return all room location objects expect the exclusion
+     */
+    public ArrayList<Location> getAllRoomLocations(Set<Integer> only) {
+        ArrayList<Location> rooms = new ArrayList<Location>(9);
+        
+        for (int i = 0; i < nodes.length; i++) {
+            for (int j = 0; j < nodes[0].length; j++) {
+            	if(nodes[i][j].getRoomId() == -1)
+            		continue; // not a room
+            	
+                if (only.contains(nodes[i][j].getRoomId())) {
+                	rooms.add(nodes[i][j]);
+                }
+            }
+        }
+        return rooms;
+    }
+    
     public ArrayList<Location> getAllDoorLocationsForRoom(int roomId) {
         if (roomId == -1) {
             return null;
