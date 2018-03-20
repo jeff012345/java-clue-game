@@ -1,12 +1,11 @@
 package cis579.ai;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import org.antinori.astar.Location;
 import org.antinori.game.Card;
 import org.antinori.game.Player;
-
-import cis579.ai.AiPlayer.FilteredLocationChoices;
 
 public class HeuristicPlayer extends AiPlayer {
 	
@@ -21,7 +20,6 @@ public class HeuristicPlayer extends AiPlayer {
 		guess.weapon = pickWeapon();
 		guess.suspect = pickSuspect();
 		
-		this.printUnknowns();
 		return guess;
 	}
 
@@ -64,8 +62,6 @@ public class HeuristicPlayer extends AiPlayer {
 		//		we need to decide the most probable solution and make an accusation
 		//		using that solution the next turn
 		// 		have a confidence level to actually make the accusation
-		
-		printUnknowns();
 	}
 
 	@Override
@@ -86,7 +82,6 @@ public class HeuristicPlayer extends AiPlayer {
 			for(Location choice : filteredChoices.roomChoices) {
 				if(!this.isCardKnown(choice.getRoomCard())) {
 					// pick the first room that the player doesn't know 
-					System.out.println("doesn't know about " + choice.getRoomCard().toString() + " so move to it");
 					return choice;
 				}
 			}
@@ -98,17 +93,34 @@ public class HeuristicPlayer extends AiPlayer {
 	}
 	
 	private Card pickWeapon() {
-		return null;
+		return pickBestCard(this.unknownWeapons);
 	}
 	
 	private Card pickSuspect() {
-		return null;
+		return pickBestCard(this.unknownSuspects);
 	}
 	
-	private double evaluateCard(Card card) {
+	private Card pickBestCard(Set<Card> cards) {
+		Card best = null;
+		double maxValue = -1;
+		double value;
 		
+		for(Card c : cards) {
+			value = evaluateCard(c);
+			
+			if(value > maxValue) {
+				maxValue = value;
+				best = c;
+			}
+		}
 		
+		return best;
+	}
+	
+	private double evaluateCard(Card c) {
+		int timesGuessed = CardTracker.timesGuessed(c);
+		int isNoShow = CardTracker.isNoShow(c) ? 1 : 0;
 		
-		return 0;
+		return 7.0 * timesGuessed + 3.4 * isNoShow;
 	}
 }

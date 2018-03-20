@@ -109,7 +109,7 @@ public class NotebookPanel extends JPanel implements MouseListener {
             SoundEffect.BUTTON.play();
         }
 
-        System.out.println("x=" + e.getX() + " y=" + e.getY() + " cell x=" + x + " cell y=" + y + " card=" + cellArray[x][y].card);
+        //System.out.println("x=" + e.getX() + " y=" + e.getY() + " cell x=" + x + " cell y=" + y + " card=" + cellArray[x][y].card);
         repaint();
 
     }

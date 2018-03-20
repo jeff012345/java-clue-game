@@ -25,6 +25,8 @@ import javax.swing.JTextArea;
 import org.antinori.astar.Location;
 
 import cis579.ai.AiPlayerManager;
+import cis579.ai.CardTracker;
+import cis579.ai.ResultLogger;
 
 public class ShowCardsRoutine {
 
@@ -41,6 +43,8 @@ public class ShowCardsRoutine {
         this.players = players;
         this.suggesting_player = suggesting_player;
         this.your_player = your_player;
+        
+        CardTracker.suggestionMade(suggestion);
 
         Card room = null, suspect = null, weapon = null;
         for (Card card : suggestion) {
@@ -125,8 +129,8 @@ public class ShowCardsRoutine {
                 if (!next_player.isHoldingCardInSuggestion(suggestion)) {
                     //nothing
                 } else {
-                    PickCardsToShowDialog2 dialog = new PickCardsToShowDialog2(suggestion, suggestion_text, next_player);
-                    card_to_show = (Card) dialog.showDialog();
+                    //PickCardsToShowDialog2 dialog = new PickCardsToShowDialog2(suggestion, suggestion_text, next_player);
+                    //card_to_show = (Card) dialog.showDialog();
                 }
 
             } else {
@@ -143,8 +147,8 @@ public class ShowCardsRoutine {
 
                         text = text + "\n\n" + suggestion_text;
 
-                        ShowCardDialog2 dialog = new ShowCardDialog2(text);
-                        dialog.setVisible(true);
+                        //ShowCardDialog2 dialog = new ShowCardDialog2(text);
+                        //dialog.setVisible(true);
 
                         card_to_show = card;
                         break;
@@ -162,15 +166,17 @@ public class ShowCardsRoutine {
                 index = 0;
             }
 
-            ShowCardDialog2 dialog = new ShowCardDialog2(next_player.toString() + "\ndoes not have\na card to show.");
-            dialog.setVisible(true);
+            //ShowCardDialog2 dialog = new ShowCardDialog2(next_player.toString() + "\ndoes not have\na card to show.");
+            //dialog.setVisible(true);
 
         }
 
         if (card_to_show == null) {
-            ShowCardDialog2 dialog = new ShowCardDialog2("No one has a\ncard to show.");
-            dialog.setVisible(true);
+            //ShowCardDialog2 dialog = new ShowCardDialog2("No one has a\ncard to show.");
+            //dialog.setVisible(true);
             
+        	CardTracker.noCardsToShow(suggestion);
+        	
             if (suggesting_player.isComputerPlayer()) {
             	AiPlayerManager.noCardsToShow(this.suggesting_player, suggestion);
             }

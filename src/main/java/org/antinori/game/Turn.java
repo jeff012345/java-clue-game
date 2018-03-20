@@ -1,29 +1,21 @@
 package org.antinori.game;
 
-import static org.antinori.game.Card.*;
+import static org.antinori.game.Card.ROOM_CONSERVATORY;
+import static org.antinori.game.Card.ROOM_KITCHEN;
+import static org.antinori.game.Card.ROOM_LOUNGE;
+import static org.antinori.game.Card.ROOM_STUDY;
 
 import java.awt.Color;
-import java.awt.FlowLayout;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
 
-import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 
 import org.antinori.astar.Location;
 import org.antinori.multiplayer.MultiplayerFrame;
 
 import cis579.ai.AiPlayerManager;
+import cis579.ai.ResultLogger;
 import cis579.ai.Solution;
 
 public class Turn {
@@ -51,23 +43,35 @@ public class Turn {
         while (!gameOver) {
 
             for (Player player : players) {
-
+            	
+            	if(player.hasMadeFalseAccusation())
+            		continue; 
+            	
                 ClueMain.setCurrentPlayer(player);
 
                 MultiplayerFrame.endTurnButton.setEnabled(false);
                 MultiplayerFrame.accuseButton.setEnabled(false);
 
-                if (player.isComputerPlayer()) {
-
-                	if (canMakeAccusationComputerPlayer(player)) {
-                        gameOver = true;
-                        break;
-                    }
+                //if (player.isComputerPlayer()) {
                 	
-                    clickOnMapComputerPlayer(player);
-                    // let them make a suggestion
-                    makeSuggestionComputerPlayer(player, players);
+            	ArrayList<Card> accusation = canMakeAccusationComputerPlayer(player);
+            	if (accusation != null) {
+            		if(ClueMain.clue.matchesVictimSet(accusation)) {
+            			gameOver = true;
+                        ResultLogger.logResult(player, accusation);
+                        break;
+            		} else {
+        				ResultLogger.wrongAccusation(player);
+        				player.setHasMadeFalseAccusation();
+        				continue;
+            		}
+                }
+            	
+                clickOnMapComputerPlayer(player);
+                // let them make a suggestion
+                makeSuggestionComputerPlayer(player, players);
 
+                /*
                 } else {
 					// dialog for showing roll dice button, take secret passage
                     // button or make suggestion button or make accusation
@@ -141,14 +145,17 @@ public class Turn {
                     MultiplayerFrame.accuseButton.setEnabled(true);
 
                 }
+                */
 
-                waitEndTurnButton();
+                //waitEndTurnButton();
 
                 if (gameOver) {
                     break;
                 }
 
             } // for loop on players
+            
+            ResultLogger.nextTurn();
 
         } // while not game over
 
@@ -192,123 +199,26 @@ public class Turn {
             Location location = player.getLocation();
             
             ArrayList<Location> choices = ClueMain.map.highlightReachablePaths(location, ClueMain.pathfinder, roll);
-            ClueMain.mapView.repaint();
+            //ClueMain.mapView.repaint();
             
             new_location = AiPlayerManager.decideLocation(player, choices);
     	}
     	
     	 if (new_location == null) {
              new_location = player.getLocation();// just keep them in the same room then
-             JOptionPane.showMessageDialog(ClueMain.frame, player.toString() + " is staying in the same room.", "", JOptionPane.PLAIN_MESSAGE);
+             //JOptionPane.showMessageDialog(ClueMain.frame, player.toString() + " is staying in the same room.", "", JOptionPane.PLAIN_MESSAGE);
 
          } else {
 
              ClueMain.setPlayerLocationFromMapClick(new_location);
-             JOptionPane.showMessageDialog(ClueMain.frame, player.toString() + " rolled a " 
-             		+ roll 
-             		+ (new_location == player.getLocation() ? " has stayed in the room." : " and has moved."), "", JOptionPane.PLAIN_MESSAGE);
+             //JOptionPane.showMessageDialog(ClueMain.frame, player.toString() + " rolled a " 
+             //		+ roll 
+             //		+ (new_location == player.getLocation() ? " has stayed in the room." : " and has moved."), "", JOptionPane.PLAIN_MESSAGE);
              ClueMain.mapView.repaint();
              ClueMain.map.resetHighlights();
          }
 
          return new_location;
-        
-        /*
-        // get all other rooms except the one they are in
-        ArrayList<Location> rooms = ClueMain.map.getAllRoomLocations(location.getRoomId());
-
-        // remove the rooms which are toggled or in their hand
-        for (Iterator<Location> it = rooms.iterator(); it.hasNext();) {
-            Location l = (Location) it.next();
-            Card room_card = new Card(TYPE_ROOM, l.getRoomId());
-            if (player.getNotebook().isCardInHand(room_card) || player.getNotebook().isCardToggled(room_card)) {
-                it.remove();
-            }
-        }
-
-        do {
-            if (isInRoom) {
-
-                int rand = new Random().nextInt(10); // randomly decide
-                if (ClueMain.difficult_setting) {
-                    rand = 0;
-                }
-
-                // see if they want to take the secret passages
-                if (location.getRoomId() == ROOM_KITCHEN) {
-                    if (!player.getNotebook().isLocationCardInHandOrToggled(new Card(TYPE_ROOM, ROOM_STUDY)) && rand < 5) {
-                        new_location = ClueMain.map.getRoomLocation(ROOM_STUDY);
-                        SoundEffect.CREAK.play();
-                        break;
-                    }
-                }
-
-                if (location.getRoomId() == ROOM_STUDY) {
-                    if (!player.getNotebook().isLocationCardInHandOrToggled(new Card(TYPE_ROOM, ROOM_KITCHEN)) && rand < 5) {
-                        new_location = ClueMain.map.getRoomLocation(ROOM_KITCHEN);
-                        SoundEffect.CREAK.play();
-                        break;
-                    }
-                }
-
-                if (location.getRoomId() == ROOM_CONSERVATORY) {
-                    if (!player.getNotebook().isLocationCardInHandOrToggled(new Card(TYPE_ROOM, ROOM_LOUNGE)) && rand < 5) {
-                        new_location = ClueMain.map.getRoomLocation(ROOM_LOUNGE);
-                        SoundEffect.CREAK.play();
-                        break;
-                    }
-                }
-
-                if (location.getRoomId() == ROOM_LOUNGE) {
-                    if (!player.getNotebook().isLocationCardInHandOrToggled(new Card(TYPE_ROOM, ROOM_CONSERVATORY)) && rand < 5) {
-                        new_location = ClueMain.map.getRoomLocation(ROOM_CONSERVATORY);
-                        SoundEffect.CREAK.play();
-                        break;
-                    }
-                }
-
-                // see if the room is in their hand or toggled
-                if (!player.getNotebook().isLocationCardInHandOrToggled(location) && rand < 5) {
-                    new_location = location;// just keep them in the same room
-                    break;
-                }
-
-            }
-
-			// see if they can move to a highlighted room which is not in their
-            // hand or toggled
-            for (Location choice : choices) {
-                if (rooms.contains(choice)) {
-                    new_location = choice;
-                    break;
-                }
-            }
-
-            if (new_location == null) {
-                int closest = 100;
-				// find a room location which is closest to them which is not in
-                // their hand or toggled
-                for (Location choice : choices) {
-                    for (Location room : rooms) {
-                        List<Location> path = ClueMain.pathfinder.findPath(ClueMain.map.getLocations(), choice, Collections.singleton(room));
-                        if (path.size() < closest) {
-                            closest = path.size();
-                            new_location = choice;
-                        }
-                    }
-                }
-            }
-
-        } while (false);
-		*/
-	
-//		System.out.println(player.toLongString() + " rolled a " + roll);
-//		System.out.println("clickOnMapComputerPlayer rooms size = " + rooms.size());
-//		System.out.println("clickOnMapComputerPlayer location = " + new_location);
-//		System.out.println("clickOnMapComputerPlayer " + player.getNotebook().toString());
-        
-       
-
     }
 
     /**
@@ -335,20 +245,20 @@ public class Turn {
         ClueMain.showcards.showCards();
     }
 
-    public boolean canMakeAccusationComputerPlayer(Player player) {
+    public ArrayList<Card> canMakeAccusationComputerPlayer(Player player) {
 
         ArrayList<Card> accusation = player.getNotebook().canMakeAccusation();
         if (accusation == null) {
-            return false;
+            return null;
         }
 
         String text = String.format(ClueMain.accusationFormatter, player.toString(), accusation.get(0).toString(), accusation.get(1).toString(), accusation.get(2).toString());
 
-        SoundEffect.GASP.play();
+        //SoundEffect.GASP.play();
 
-        JOptionPane.showMessageDialog(ClueMain.frame, text + "\n\nThe accusation is true.  Game over.", "Accusation", JOptionPane.PLAIN_MESSAGE);
+        //JOptionPane.showMessageDialog(ClueMain.frame, text + "\n\nThe accusation is true.  Game over.", "Accusation", JOptionPane.PLAIN_MESSAGE);
 
-        return true;
+        return accusation;
     }
 
     public void startTurnMultiplayerTurn(Player player) {

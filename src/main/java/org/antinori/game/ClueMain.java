@@ -44,9 +44,10 @@ import org.antinori.astar.RoomIconPlacement;
 import org.antinori.multiplayer.MultiplayerFrame;
 
 import cis579.ai.AiPlayerManager;
+import cis579.ai.ResultLogger;
 
 public class ClueMain {
-
+	
     public static Clue clue;
     public static ClueMap map;
     public static MapView mapView;
@@ -54,7 +55,7 @@ public class ClueMain {
     public static NotebookPanel notebookpanel;
     public static ShowCardsRoutine showcards;
     public static MultiplayerFrame multiplayerFrame;
-    public static Turn turn = new Turn();
+    public static Turn turn;
 
     public static ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(10);
 
@@ -192,16 +193,19 @@ public class ClueMain {
     public static void startSinglePlayerGame() {
 
         clue = new Clue();
+        turn = new Turn();
 
-        SinglePlayerSelectionDialog2 settingsDialog = new SinglePlayerSelectionDialog2(frame, true);
-        settingsDialog.setVisible(true);
+        AiPlayerManager.createAiPlayers();
+        
+        //SinglePlayerSelectionDialog2 settingsDialog = new SinglePlayerSelectionDialog2(frame, true);
+        //settingsDialog.setVisible(true);
 
         try {
             clue.createDeck();
 
             String msg = clue.dealShuffledDeck();
 
-            System.out.println(msg);
+            //System.out.println(msg);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -256,6 +260,12 @@ public class ClueMain {
 
         turn.startGame(players);
 
+        if(ResultLogger.runAgain()) {
+        	startSinglePlayerGame();
+        	return;
+        }
+        
+        ResultLogger.printResults();
     }
 
     public static void setUpMultiplayerGame() {

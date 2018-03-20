@@ -21,7 +21,7 @@ public class RandomPlayer extends AiPlayer {
 		guess.weapon = pickCardRandomly(this.unknownWeapons);
 		guess.suspect = pickCardRandomly(this.unknownSuspects);
 		
-		this.printUnknowns();
+		//this.printUnknowns();
 		return guess;
 	}
 	
@@ -49,7 +49,7 @@ public class RandomPlayer extends AiPlayer {
 	@Override
 	public Location decideLocation(ArrayList<Location> choices) {
 		
-		printUnknowns();
+		//printUnknowns();
 		
 		FilteredLocationChoices filteredChoices = this.filterChoices(choices);
 		
@@ -67,7 +67,7 @@ public class RandomPlayer extends AiPlayer {
 			for(Location choice : filteredChoices.roomChoices) {
 				if(!this.isCardKnown(choice.getRoomCard())) {
 					// pick the first room that the player doesn't know 
-					System.out.println("doesn't know about " + choice.getRoomCard().toString() + " so move to it");
+					//System.out.println("doesn't know about " + choice.getRoomCard().toString() + " so move to it");
 					return choice;
 				}
 			}
@@ -89,12 +89,11 @@ public class RandomPlayer extends AiPlayer {
 		this.unknownWeapons.clear();
 		this.unknownWeapons.add(suggestion.weapon);
 		
-		printUnknowns();
+		//printUnknowns();
 	}
 	
 	private Card pickCardRandomly(Set<Card> cards) {
 		int randomIndex = (int) Math.floor(Math.random() * cards.size());
-		System.out.println("random index = " + randomIndex);
 		
 		Iterator<Card> iter = cards.iterator();
 		int i = 0;

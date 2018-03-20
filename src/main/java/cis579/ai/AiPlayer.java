@@ -95,25 +95,25 @@ public abstract class AiPlayer implements ShownCardListener {
 	}
 	
 	public void onShownCard(Card card) {
-		System.out.println(this.player.getSuspectName() + " shown " + card.toString());
+		//System.out.println(this.player.getSuspectName() + " shown " + card.toString());
 		switch(card.getType()) {
         case Card.TYPE_ROOM:
-        	System.out.println("Shown room. Count = " + unknownRooms.size());
+        	//System.out.println("Shown room. Count = " + unknownRooms.size());
         	unknownRooms.remove(card);
-        	System.out.println("Remove count = " + unknownRooms.size());
+        	//System.out.println("Remove count = " + unknownRooms.size());
         	break;
         case Card.TYPE_WEAPON:
-        	System.out.println("Shown weapon. Count = " + unknownWeapons.size());
+        	//System.out.println("Shown weapon. Count = " + unknownWeapons.size());
         	unknownWeapons.remove(card);
-        	System.out.println("Remove count = " + unknownWeapons.size());
+        	//System.out.println("Remove count = " + unknownWeapons.size());
         	break;
         case Card.TYPE_SUSPECT:
-        	System.out.println("Shown suspect. Count = " + unknownSuspects.size());
+        	//System.out.println("Shown suspect. Count = " + unknownSuspects.size());
         	unknownSuspects.remove(card);
-        	System.out.println("Remove count = " + unknownSuspects.size());
+        	//System.out.println("Remove count = " + unknownSuspects.size());
         	break;
         }
-		printUnknowns();
+		//printUnknowns();
 	}
 	
 	protected void printUnknowns() {

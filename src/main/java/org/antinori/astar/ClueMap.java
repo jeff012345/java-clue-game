@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -14,8 +15,17 @@ public class ClueMap implements Serializable {
     private final Location[][] nodes;
     private int hbound = 0;
     private int vbound = 0;
+    
+    HashMap<Integer, Location> roomLocationsByRoomId;
+    HashMap<Integer, ArrayList<Location>> roomLocationsWithExclusion;
+    Collection<Location> allLocations;
+    HashMap<Integer, ArrayList<Location>> allDoorLocationsForRoom;
 
     public ClueMap(String template) throws Exception {
+    	
+    	roomLocationsByRoomId = new HashMap<Integer, Location>();
+    	roomLocationsWithExclusion = new HashMap<Integer, ArrayList<Location>>();
+    	allDoorLocationsForRoom = new HashMap<Integer, ArrayList<Location>>();
 
         StringTokenizer tokens = new StringTokenizer(template, "\n");
         vbound = tokens.countTokens();
@@ -89,17 +99,23 @@ public class ClueMap implements Serializable {
     }
 
     public Collection<Location> getLocations() {
-        Collection<Location> locations = new ArrayList<Location>();
+    	if(allLocations != null)
+    		return allLocations;
+    	
+		allLocations = new ArrayList<Location>();
         for (int i = 0; i < nodes.length; i++) {
             for (int j = 0; j < nodes[0].length; j++) {
-                locations.add(nodes[i][j]);
+            	allLocations.add(nodes[i][j]);
             }
         }
-        return locations;
+        return allLocations;
     }
 
     public Location getRoomLocation(int room_id) {
-        Location room = null;
+        Location room = roomLocationsByRoomId.get(room_id);
+        
+        if(room != null)
+        	return room;
         
         for (int i = 0; i < nodes.length; i++) {
             for (int j = 0; j < nodes[0].length; j++) {
@@ -109,6 +125,8 @@ public class ClueMap implements Serializable {
                 }
             }
         }
+        
+        roomLocationsByRoomId.put(room_id, room);
         return room;
     }
 
@@ -117,7 +135,11 @@ public class ClueMap implements Serializable {
      * @return all room location objects expect the exclusion
      */
     public ArrayList<Location> getAllRoomLocations(int exclusion) {
-        ArrayList<Location> rooms = new ArrayList<Location>(9);
+    	ArrayList<Location> rooms = roomLocationsWithExclusion.get(exclusion);
+    	if(rooms != null) {
+    		return rooms;
+    	}
+    	rooms = new ArrayList<Location>(9);
         for (int i = 0; i < nodes.length; i++) {
             for (int j = 0; j < nodes[0].length; j++) {
                 if (nodes[i][j].getRoomId() == exclusion) {
@@ -128,6 +150,8 @@ public class ClueMap implements Serializable {
                 }
             }
         }
+        
+        roomLocationsWithExclusion.put(exclusion, rooms);
         return rooms;
     }
 
@@ -155,7 +179,12 @@ public class ClueMap implements Serializable {
         if (roomId == -1) {
             return null;
         }
-        ArrayList<Location> doors = new ArrayList<Location>();
+        
+        ArrayList<Location> doors = allDoorLocationsForRoom.get(roomId);
+        if(doors != null)
+        	return doors;
+        
+        doors = new ArrayList<Location>();
         for (int i = 0; i < nodes.length; i++) {
             for (int j = 0; j < nodes[0].length; j++) {
                 if (nodes[i][j].getRoomId() == roomId) {;
@@ -163,6 +192,8 @@ public class ClueMap implements Serializable {
                 }
             }
         }
+        
+        allDoorLocationsForRoom.put(roomId, doors);
         return doors;
     }
 

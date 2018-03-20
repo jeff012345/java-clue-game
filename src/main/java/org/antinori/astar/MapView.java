@@ -149,7 +149,7 @@ public class MapView extends JPanel implements MouseListener {
             ClueMain.setPlayerLocationFromMapClick(loc);
             repaint();
         }
-        System.out.println("x=" + e.getX() + " y=" + e.getY() + " cell x=" + x + " cell y=" + y);
+        //System.out.println("x=" + e.getX() + " y=" + e.getY() + " cell x=" + x + " cell y=" + y);
     }
 
     public void mousePressed(MouseEvent e) {
@@ -178,12 +178,12 @@ public class MapView extends JPanel implements MouseListener {
 
         int roll1 = ClueMain.dice.roll();
         int roll2 = ClueMain.dice.roll();
-        SoundEffect.DICE.play();
+        //SoundEffect.DICE.play();
 
-        rolledDiceImageLeft = dice_faces.get(roll1 - 1);
-        rolledDiceImageRight = dice_faces.get(roll2 - 1);
+        //rolledDiceImageLeft = dice_faces.get(roll1 - 1);
+        //rolledDiceImageRight = dice_faces.get(roll2 - 1);
 
-        ClueMain.multiplayerFrame.sendDiceRollEvent(roll1, roll2);
+        //ClueMain.multiplayerFrame.sendDiceRollEvent(roll1, roll2);
 
         return roll1 + roll2;
 

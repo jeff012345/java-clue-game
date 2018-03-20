@@ -1,17 +1,21 @@
 package org.antinori.game;
 
+import static org.antinori.game.Card.NUM_ROOMS;
+import static org.antinori.game.Card.NUM_SUSPECTS;
+import static org.antinori.game.Card.NUM_WEAPONS;
+import static org.antinori.game.Card.TOTAL;
+import static org.antinori.game.Card.TYPE_ROOM;
+import static org.antinori.game.Card.TYPE_SUSPECT;
+import static org.antinori.game.Card.TYPE_WEAPON;
+
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
-import static org.antinori.game.Card.*;
-
 import java.util.Random;
 
 import org.antinori.multiplayer.DealRequestHandler;
 
 import com.smartfoxserver.v2.entities.data.SFSObject;
-
-import cis579.ai.AiPlayerManager;
 
 public class Clue extends SFSObject {
 
@@ -42,7 +46,7 @@ public class Clue extends SFSObject {
         }
 
         // shuffle it
-        Random rand = new Random();
+        Random rand = new Random(System.currentTimeMillis() % 389);
         for (int i = 0; i < TOTAL; i++) {
             int r = rand.nextInt(deck.size());
             Card c = deck.remove(r);

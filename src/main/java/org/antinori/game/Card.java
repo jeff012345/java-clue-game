@@ -65,6 +65,13 @@ public class Card implements SerializableSFSType, Comparable<Card> {
     public static final Card CONSERVATORY = new Card(TYPE_ROOM, ROOM_CONSERVATORY);
     public static final Card STUDY = new Card(TYPE_ROOM, ROOM_STUDY);
     
+    public static final String PEACOCK_NAME = "Mrs. Peacock";
+    public static final String SCARLET_NAME = "Miss Scarlet";
+    public static final String PLUM_NAME = "Professor Plum";
+    public static final String WHITE_NAME = "Mrs. White";
+    public static final String MUSTARD_NAME = "Colonel Mustard";
+    public static final String GREEN_NAME = "Mr. Green";
+    
     public Card(int type, int value) {
         this.type = type;
         this.value = value;
@@ -116,22 +123,22 @@ public class Card implements SerializableSFSType, Comparable<Card> {
             case TYPE_SUSPECT:
                 switch (value) {
                     case SUSPECT_SCARLET:
-                        desc = "Miss Scarlet";
+                        desc = SCARLET_NAME;
                         break;
                     case SUSPECT_PLUM:
-                        desc = "Professor Plum";
+                        desc = PLUM_NAME;
                         break;
                     case SUSPECT_WHITE:
-                        desc = "Mrs. White";
+                        desc = WHITE_NAME;
                         break;
                     case SUSPECT_MUSTARD:
-                        desc = "Colonel Mustard";
+                        desc = MUSTARD_NAME;
                         break;
                     case SUSPECT_GREEN:
-                        desc = "Mr. Green";
+                        desc = GREEN_NAME;
                         break;
                     case SUSPECT_PEACOCK:
-                        desc = "Mrs. Peacock";
+                        desc = PEACOCK_NAME;
                         break;
                 }
                 break;
