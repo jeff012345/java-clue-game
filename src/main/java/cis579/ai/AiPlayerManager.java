@@ -16,6 +16,7 @@ import static org.antinori.game.Player.COLOR_WHITE;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.antinori.astar.Location;
 import org.antinori.game.Card;
@@ -26,8 +27,30 @@ public class AiPlayerManager {
 	
 	private static final Map<Player, AiPlayer> aiPlayers = new HashMap<Player, AiPlayer>();
 	
+	public enum PlayerType {
+		HEURISTIC, RANDOM
+	};
+	
+	public static PlayerType getPlayerType(String name) {
+		Optional<Player> player = aiPlayers.keySet().stream().filter(p -> p.getSuspectName().equals(name)).findFirst();
+		
+		if(!player.isPresent()) {
+			return null;
+		}
+		
+		AiPlayer aiPlayer = aiPlayers.get(player.get());
+		
+		if(aiPlayer instanceof RandomPlayer)
+			return PlayerType.RANDOM;
+		
+		if(aiPlayer instanceof HeuristicPlayer)
+			return PlayerType.HEURISTIC;
+		
+		return null;
+	}
+	
 	public static void createAiPlayers() {
-		int players = 6;
+		int players = 4;
 		
         ClueMain.clue.addPlayer(scarlet, "", COLOR_SCARLET, true);
         ClueMain.clue.addPlayer(green, "", COLOR_GREEN, true);
@@ -86,7 +109,28 @@ public class AiPlayerManager {
 		return aiPlayers.get(player).decideLocation(choices);
 	}
 	
-	public static void noCardsToShow(Player player, ArrayList<Card> cards) {
+	/**
+	 * Opponent does not have any cards in the suggestion
+	 * @param player
+	 * @param showingPlayer
+	 * @param suggestion
+	 */
+	public static void onPlayerNoCardsToShow(Player player, Player showingPlayer, ArrayList<Card> suggestion) {
+		aiPlayers.get(player).onPlayerNoCardsToShow(showingPlayer, suggestion);
+	}
+	
+	/**
+	 * Opponent shows a card
+	 * @param player
+	 * @param showingPlayer
+	 * @param suggestion
+	 * @param shown
+	 */
+	public static void onShowCard(Player player, Player showingPlayer, ArrayList<Card> suggestion, Card shown) {
+		aiPlayers.get(player).onShownCard(showingPlayer, suggestion, shown);
+	}
+	
+	public static void allPlayerNoCardsToShow(Player player, ArrayList<Card> cards) {
 		Solution suggestion = new Solution();
 		for(Card c : cards) {
 			switch(c.getType()) {
@@ -102,6 +146,6 @@ public class AiPlayerManager {
 	        }
 		}
 		
-		aiPlayers.get(player).onNoCardsToShow(suggestion);
+		aiPlayers.get(player).onAllPlayersNoCardsToShow(suggestion);
 	}
 }

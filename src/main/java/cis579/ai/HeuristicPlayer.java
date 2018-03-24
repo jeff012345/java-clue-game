@@ -1,16 +1,68 @@
 package cis579.ai;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.antinori.astar.Location;
 import org.antinori.game.Card;
 import org.antinori.game.Player;
+import org.apache.commons.math3.fitting.PolynomialCurveFitter;
+import org.apache.commons.math3.fitting.WeightedObservedPoints;
+
+import cis579.ai.de.ResultDE;
 
 public class HeuristicPlayer extends AiPlayer {
 	
+	private static double[] coefficients = new double[3];
+	
+	private HashMap<Card, AtomicInteger> guessedButNotShown = new HashMap<>();
+	
 	public HeuristicPlayer(Player player) {
 		super(player);
+	}
+	
+	public static void determineCoefficients() {
+		List<ResultDE> results = Database.getInstance().getAllResults();
+		
+		coefficients[0] = fitCoefficient(results, 0);
+		coefficients[1] = fitCoefficient(results, 1);
+		coefficients[2] = fitCoefficient(results, 2);
+		
+		System.out.println("a = " + coefficients[0] + "; b = " + coefficients[1] +"; c = " + coefficients[2]);
+	}
+	
+	private static double fitCoefficient(List<ResultDE> results, int index) {
+		if(results.size() < 200000000) {
+			return Math.random() * 100;
+		}
+		
+		// Collect data.
+		final WeightedObservedPoints obs = new WeightedObservedPoints();
+		
+		for(ResultDE r : results) {
+			obs.add(r.getCoefficients()[index], r.getSuccessRate());
+		}
+		
+		// Instantiate a third-degree polynomial fitter.
+		final PolynomialCurveFitter fitter = PolynomialCurveFitter.create(2);
+
+		// Retrieve fitted parameters (coefficients of the polynomial function).
+		final double[] coeff = fitter.fit(obs.toList());
+		
+		System.out.println("coeff length = " + coeff.length);
+		
+		// a^2x + bx + c
+		// 2ax + b = 0
+		// x = -b / 2a 
+
+		return coeff[1] / (-2.0  * coeff[0]);
+	}
+	
+	public static double[] getCoefficients() {
+		return new double[] { coefficients[0], coefficients[1], coefficients[2] };
 	}
 	
 	@Override
@@ -44,7 +96,7 @@ public class HeuristicPlayer extends AiPlayer {
 	}
 
 	@Override
-	public void onNoCardsToShow(Solution suggestion) {
+	public void onAllPlayersNoCardsToShow(Solution suggestion) {
 		this.unknownRooms.clear();
 		this.unknownRooms.add(suggestion.room);
 		
@@ -92,6 +144,35 @@ public class HeuristicPlayer extends AiPlayer {
 		return this.findClosestLocationToAnUnknownRoom(filteredChoices.otherChoices);
 	}
 	
+	@Override
+	public void onShownCard(Player showingPlayer, List<Card> suggestion, Card card) {
+		super.onShownCard(showingPlayer, suggestion, card);
+		
+		if(showingPlayer == null)
+			return;
+		
+		suggestion.stream().filter(c -> !c.equals(card)).forEach(c -> {
+			AtomicInteger cnt = guessedButNotShown.get(c);
+			if (cnt == null) {
+				guessedButNotShown.put(c, new AtomicInteger(1));
+			} else {
+				cnt.incrementAndGet();
+			}
+		});
+	}
+	
+	@Override
+	public void onPlayerNoCardsToShow(Player showingPlayer, List<Card> suggestion) {
+		suggestion.stream().forEach(c -> {
+			AtomicInteger cnt = guessedButNotShown.get(c);
+			if (cnt == null) {
+				guessedButNotShown.put(c, new AtomicInteger(1));
+			} else {
+				cnt.incrementAndGet();
+			}
+		});
+	}
+	
 	private Card pickWeapon() {
 		return pickBestCard(this.unknownWeapons);
 	}
@@ -120,7 +201,9 @@ public class HeuristicPlayer extends AiPlayer {
 	private double evaluateCard(Card c) {
 		int timesGuessed = CardTracker.timesGuessed(c);
 		int isNoShow = CardTracker.isNoShow(c) ? 1 : 0;
+		int timesNotShown = guessedButNotShown.containsKey(c) ? guessedButNotShown.get(c).get() : 0;
 		
-		return 7.0 * timesGuessed + 3.4 * isNoShow;
+		return coefficients[0] * timesGuessed + coefficients[1] * isNoShow + coefficients[2] * timesNotShown;
 	}
+
 }

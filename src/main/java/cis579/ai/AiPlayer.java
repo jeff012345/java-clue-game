@@ -16,7 +16,7 @@ import org.antinori.game.ClueMain;
 import org.antinori.game.Notebook;
 import org.antinori.game.Player;
 
-public abstract class AiPlayer implements ShownCardListener {
+public abstract class AiPlayer {
 
 	protected Player player;
 	
@@ -27,8 +27,6 @@ public abstract class AiPlayer implements ShownCardListener {
 	public AiPlayer(Player player) {
 		this.player = player;
 		
-		this.player.getNotebook().setShownCardListener(this);
-		
 		this.unknownWeapons = new TreeSet<Card>();
 		this.unknownRooms = new TreeSet<Card>();
 		this.unknownSuspects = new TreeSet<Card>();
@@ -37,7 +35,7 @@ public abstract class AiPlayer implements ShownCardListener {
 		
 		// initialize cards
 		for(Card card : player.getCardsInHand()) {
-			this.onShownCard(card);
+			this.onShownCard(null, null, card);
 		}
 	}
 	
@@ -59,7 +57,14 @@ public abstract class AiPlayer implements ShownCardListener {
 	/**
 	 * event is triggered when the suggestion has no cards to show
 	 */
-	public abstract void onNoCardsToShow(Solution suggestion);
+	public abstract void onAllPlayersNoCardsToShow(Solution suggestion);
+	
+	/**
+	 * Opponent does not have any cards in the suggestion	
+	 * @param showingPlayer
+	 * @param suggestion
+	 */
+	public abstract void onPlayerNoCardsToShow(Player showingPlayer, List<Card> suggestion);
 	
 	/**
 	 * Assumes that the player has already decided to roll
@@ -94,26 +99,24 @@ public abstract class AiPlayer implements ShownCardListener {
         }
 	}
 	
-	public void onShownCard(Card card) {
-		//System.out.println(this.player.getSuspectName() + " shown " + card.toString());
+	/**
+	 * Opponent shows a card from the suggestion
+	 * @param showingPlayer
+	 * @param suggestion
+	 * @param card
+	 */
+	public void onShownCard(Player showingPlayer, List<Card> suggestion, Card card) {
 		switch(card.getType()) {
         case Card.TYPE_ROOM:
-        	//System.out.println("Shown room. Count = " + unknownRooms.size());
         	unknownRooms.remove(card);
-        	//System.out.println("Remove count = " + unknownRooms.size());
         	break;
         case Card.TYPE_WEAPON:
-        	//System.out.println("Shown weapon. Count = " + unknownWeapons.size());
         	unknownWeapons.remove(card);
-        	//System.out.println("Remove count = " + unknownWeapons.size());
         	break;
         case Card.TYPE_SUSPECT:
-        	//System.out.println("Shown suspect. Count = " + unknownSuspects.size());
         	unknownSuspects.remove(card);
-        	//System.out.println("Remove count = " + unknownSuspects.size());
         	break;
         }
-		//printUnknowns();
 	}
 	
 	protected void printUnknowns() {
@@ -188,7 +191,7 @@ public abstract class AiPlayer implements ShownCardListener {
 	}
 	
 	public void addCardToHand(Card card) {
-		this.onShownCard(card);
+		this.onShownCard(null, null, card);
 	}
 	
 	public boolean isCardKnown(Card card) {

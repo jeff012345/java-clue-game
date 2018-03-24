@@ -2,6 +2,7 @@ package cis579.ai;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.antinori.astar.Location;
@@ -79,7 +80,7 @@ public class RandomPlayer extends AiPlayer {
 	}
 	
 	@Override
-	public void onNoCardsToShow(Solution suggestion) {
+	public void onAllPlayersNoCardsToShow(Solution suggestion) {
 		this.unknownRooms.clear();
 		this.unknownRooms.add(suggestion.room);
 		
@@ -107,6 +108,10 @@ public class RandomPlayer extends AiPlayer {
 		
 		return null;
 	}
-	
+
+	@Override
+	public void onPlayerNoCardsToShow(Player showingPlayer, List<Card> suggestion) {
+	}
+
 }
 

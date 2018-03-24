@@ -8,7 +8,19 @@
     <version>1.0.1</version>
     
     <dependencies>
-
+		
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-math3</artifactId>
+		    <version>3.6.1</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.h2database</groupId>
+		    <artifactId>h2</artifactId>
+		    <version>1.4.197</version>
+		</dependency>
+		
         <dependency>
             <groupId>smartfox</groupId>
             <artifactId>sfs2x-client-core</artifactId>

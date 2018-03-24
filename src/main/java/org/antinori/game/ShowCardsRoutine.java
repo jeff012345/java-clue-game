@@ -125,14 +125,14 @@ public class ShowCardsRoutine {
             }
 
             if (next_player == your_player) {
-
+            	/*
                 if (!next_player.isHoldingCardInSuggestion(suggestion)) {
                     //nothing
                 } else {
                     //PickCardsToShowDialog2 dialog = new PickCardsToShowDialog2(suggestion, suggestion_text, next_player);
                     //card_to_show = (Card) dialog.showDialog();
                 }
-
+				*/
             } else {
 
                 ArrayList<Card> cards_in_hand = next_player.getCardsInHand();
@@ -151,10 +151,13 @@ public class ShowCardsRoutine {
                         //dialog.setVisible(true);
 
                         card_to_show = card;
+                        AiPlayerManager.onShowCard(suggesting_player, next_player, suggestion, card);
                         break;
                     }
                 }
-
+                
+                CardTracker.playerHasNoCardsToShow(next_player, suggestion);
+                AiPlayerManager.onPlayerNoCardsToShow(next_player, suggesting_player, suggestion);
             }
 
             if (card_to_show != null) {
@@ -175,16 +178,17 @@ public class ShowCardsRoutine {
             //ShowCardDialog2 dialog = new ShowCardDialog2("No one has a\ncard to show.");
             //dialog.setVisible(true);
             
-        	CardTracker.noCardsToShow(suggestion);
+        	CardTracker.playersHaveNoCardsToShow(suggestion);
         	
             if (suggesting_player.isComputerPlayer()) {
-            	AiPlayerManager.noCardsToShow(this.suggesting_player, suggestion);
+            	AiPlayerManager.allPlayerNoCardsToShow(this.suggesting_player, suggestion);
             }
         } else {
             //set the card as toggled in their notebook
             if (suggesting_player.isComputerPlayer()) {
                 suggesting_player.getNotebook().setToggled(card_to_show);
             }
+            
         }
 
     }

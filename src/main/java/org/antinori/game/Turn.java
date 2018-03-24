@@ -9,8 +9,6 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-import javax.swing.JOptionPane;
-
 import org.antinori.astar.Location;
 import org.antinori.multiplayer.MultiplayerFrame;
 
@@ -36,7 +34,7 @@ public class Turn {
     }
 
     public void startGame(ArrayList<Player> players) {
-
+    	
         ClueMain.mapView.setEnabled(false); // disable clicking on the map until
         // they roll the dice
 
@@ -158,7 +156,7 @@ public class Turn {
             ResultLogger.nextTurn();
 
         } // while not game over
-
+        
     }
 
     public void waitEndTurnButton() {

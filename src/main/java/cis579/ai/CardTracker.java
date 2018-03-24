@@ -8,12 +8,15 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.antinori.game.Card;
+import org.antinori.game.Player;
 
 public class CardTracker {
 
 	private static final HashMap<Card, AtomicInteger> TIMES_GUESSED = new HashMap<Card, AtomicInteger>();
 	private static final Set<Card> NO_SHOW = new TreeSet<Card>();
 	private static final List<Card> ALL_CARDS = new ArrayList<Card>();
+	
+	private static final HashMap<Player, Set<Card>> notInHand = new HashMap<>();
 	
 	static {
 		getAllCards();
@@ -23,6 +26,7 @@ public class CardTracker {
 	public static void reset() {
 		TIMES_GUESSED.clear();
 		NO_SHOW.clear();
+		notInHand.clear();
 		
 		for(Card c : ALL_CARDS) {
 			TIMES_GUESSED.put(c, new AtomicInteger(0));
@@ -35,7 +39,20 @@ public class CardTracker {
 		}
 	}
 	
-	public static void noCardsToShow(ArrayList<Card> suggestion) {
+	public static void playerHasNoCardsToShow(Player player, ArrayList<Card> suggestion) {
+		Set<Card> cards = notInHand.get(player);
+		
+		if(cards == null) {
+			cards = new TreeSet<>();
+			notInHand.put(player, cards);
+		}
+		
+		for(Card c : suggestion) {
+			cards.add(c);
+		}
+	}
+	
+	public static void playersHaveNoCardsToShow(ArrayList<Card> suggestion) {
 		for(Card c : suggestion) {
 			NO_SHOW.add(c);
 		}

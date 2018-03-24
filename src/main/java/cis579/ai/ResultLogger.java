@@ -7,24 +7,23 @@ import java.util.Map.Entry;
 import org.antinori.game.Card;
 import org.antinori.game.Player;
 
+import cis579.ai.AiPlayerManager.PlayerType;
+
 public class ResultLogger {
 
 	private static final long START_TIME = System.currentTimeMillis();
 	
-	private static final int MAX_RUNS = 500;
+	private static final int MAX_RUNS = 100;
 	private static int runs = 0;
 	private static int turns = 0;
 	
 	private static final HashMap<String, Integer> WINS_PER_SUSPECT = new HashMap<String, Integer>();
 	private static final HashMap<Integer, Integer> TURNS_PER_GAME = new HashMap<Integer, Integer>();
 	
+	private static final Database database = Database.getInstance();
+	
 	static {
-		WINS_PER_SUSPECT.put(Card.SCARLET_NAME, 0);
-		WINS_PER_SUSPECT.put(Card.WHITE_NAME, 0);
-		WINS_PER_SUSPECT.put(Card.PLUM_NAME, 0);
-		WINS_PER_SUSPECT.put(Card.MUSTARD_NAME, 0);
-		WINS_PER_SUSPECT.put(Card.PEACOCK_NAME, 0);
-		WINS_PER_SUSPECT.put(Card.GREEN_NAME, 0);
+		reset();
 	}
 	
 	public static void nextTurn() {
@@ -32,7 +31,27 @@ public class ResultLogger {
 	}
 	
 	public static boolean runAgain() {
-		return runs < MAX_RUNS;
+		//return runs < MAX_RUNS)
+		
+		if(runs % MAX_RUNS == 0) {
+			printResults();
+			reset();
+		}
+		
+		return true;
+	}
+	
+	public static void reset() {
+		WINS_PER_SUSPECT.put(Card.SCARLET_NAME, 0);
+		WINS_PER_SUSPECT.put(Card.WHITE_NAME, 0);
+		WINS_PER_SUSPECT.put(Card.PLUM_NAME, 0);
+		WINS_PER_SUSPECT.put(Card.MUSTARD_NAME, 0);
+		WINS_PER_SUSPECT.put(Card.PEACOCK_NAME, 0);
+		WINS_PER_SUSPECT.put(Card.GREEN_NAME, 0);
+		
+		runs = 0;
+		
+		HeuristicPlayer.determineCoefficients();
 	}
 	
 	public static void logResult(Player player, ArrayList<Card> accusation) {
@@ -63,10 +82,19 @@ public class ResultLogger {
 	}
 	
 	public static void printResults() {
+		double totalWins = 0;
+		
 		System.out.println("=====================================================================================\n");
 		
 		for(Entry<String, Integer> entry : WINS_PER_SUSPECT.entrySet()) {
-			System.out.println(entry.getKey() + " wins " + entry.getValue());
+			String name = entry.getKey();
+			int wins = entry.getValue().intValue();
+			
+			System.out.println(name + " wins " + wins);
+			
+			if(AiPlayerManager.getPlayerType(entry.getKey()) == PlayerType.HEURISTIC) {
+				totalWins += wins;
+			}
 		}
 		
 		int sum = 0;
@@ -95,6 +123,9 @@ public class ResultLogger {
 		System.out.println("Min Turns = " + min + " in round " + minRound);
 		
 		System.out.println("\n=====================================================================================");
+		
+		double[] heuristics = HeuristicPlayer.getCoefficients();
+		database.logCoefficientResult(heuristics[0], heuristics[1], heuristics[2], totalWins / MAX_RUNS);
 	}
 	
 	

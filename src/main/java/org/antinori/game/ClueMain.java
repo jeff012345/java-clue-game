@@ -19,6 +19,7 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Transparency;
+import java.awt.event.WindowEvent;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
@@ -44,6 +45,7 @@ import org.antinori.astar.RoomIconPlacement;
 import org.antinori.multiplayer.MultiplayerFrame;
 
 import cis579.ai.AiPlayerManager;
+import cis579.ai.Database;
 import cis579.ai.ResultLogger;
 
 public class ClueMain {
@@ -112,6 +114,15 @@ public class ClueMain {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         frame.setIconImage(getImageIcon("clue-icon.png").getImage());
+        
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent windowEvent) {
+                super.windowClosing(windowEvent);
+                
+                Database.getInstance().close();
+            }
+        });
 
         //invisible for now
         showcards = new ShowCardsRoutine();
