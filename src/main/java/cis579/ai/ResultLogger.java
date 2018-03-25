@@ -3,19 +3,21 @@ package cis579.ai;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import org.antinori.game.Card;
+import org.antinori.game.ClueMain;
 import org.antinori.game.Player;
 
-import cis579.ai.AiPlayerManager.PlayerType;
+import cis579.ai.de.ResultDE;
 
 public class ResultLogger {
 
 	private static final long START_TIME = System.currentTimeMillis();
 	
 	private static final int MAX_RUNS = 100;
-	private static int runs = 0;
-	private static int turns = 0;
+	private static int runs = 1;
+	private static int turns = 1;
 	
 	private static final HashMap<String, Integer> WINS_PER_SUSPECT = new HashMap<String, Integer>();
 	private static final HashMap<Integer, Integer> TURNS_PER_GAME = new HashMap<Integer, Integer>();
@@ -49,28 +51,25 @@ public class ResultLogger {
 		WINS_PER_SUSPECT.put(Card.PEACOCK_NAME, 0);
 		WINS_PER_SUSPECT.put(Card.GREEN_NAME, 0);
 		
-		runs = 0;
-		
-		HeuristicPlayer.determineCoefficients();
+		HeuristicPlayer.resetCoefficients();
 	}
 	
 	public static void logResult(Player player, ArrayList<Card> accusation) {
-		runs++;
-		
 		WINS_PER_SUSPECT.put(player.getSuspectName(), WINS_PER_SUSPECT.get(player.getSuspectName()) + 1);
 		TURNS_PER_GAME.put(runs, turns);
 
 		CardTracker.reset();
 		
-		turns = 0;
-		
 		double minutesElasped = (System.currentTimeMillis() - START_TIME) / 60000D;
 		double gamesPerMinute = runs < 5 ? -1 : runs / minutesElasped;
-		double remainingMinutes = gamesPerMinute == -1 ? -1 : (MAX_RUNS - runs) / gamesPerMinute; 
+		double remainingMinutes = gamesPerMinute == -1 ? -1 : (MAX_RUNS - (runs % MAX_RUNS)) / gamesPerMinute; 
 		
-		System.out.println("Game " + runs + " of " + MAX_RUNS
+		System.out.println("Game " + (runs % MAX_RUNS) + " of " + MAX_RUNS
 				+ ". Games per minute = " + Math.round(gamesPerMinute)
 				+ ". Remainging time = " + Math.round(remainingMinutes * 100D) / 100D + " min" );
+		
+		runs++;
+		turns = 1;
 	}
 	
 	public static int currentTurn() {
@@ -82,19 +81,24 @@ public class ResultLogger {
 	}
 	
 	public static void printResults() {
-		double totalWins = 0;
 		
 		System.out.println("=====================================================================================\n");
 		
+		String gameGuid = UUID.randomUUID().toString();
+		
 		for(Entry<String, Integer> entry : WINS_PER_SUSPECT.entrySet()) {
 			String name = entry.getKey();
-			int wins = entry.getValue().intValue();
+			double wins = entry.getValue().intValue();
 			
 			System.out.println(name + " wins " + wins);
 			
-			if(AiPlayerManager.getPlayerType(entry.getKey()) == PlayerType.HEURISTIC) {
-				totalWins += wins;
-			}
+			HeuristicPlayer aiPlayer = (HeuristicPlayer) AiPlayerManager.getPlayer(name);
+			if(aiPlayer == null)
+				continue; // not playing
+			
+			double[] heuristics = aiPlayer.getCoefficients();
+			
+			database.logCoefficientResult(new ResultDE(heuristics, wins / MAX_RUNS, gameGuid));
 		}
 		
 		int sum = 0;
@@ -123,9 +127,6 @@ public class ResultLogger {
 		System.out.println("Min Turns = " + min + " in round " + minRound);
 		
 		System.out.println("\n=====================================================================================");
-		
-		double[] heuristics = HeuristicPlayer.getCoefficients();
-		database.logCoefficientResult(heuristics[0], heuristics[1], heuristics[2], totalWins / MAX_RUNS);
 	}
 	
 	

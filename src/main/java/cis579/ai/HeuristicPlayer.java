@@ -3,6 +3,7 @@ package cis579.ai;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -16,22 +17,21 @@ import cis579.ai.de.ResultDE;
 
 public class HeuristicPlayer extends AiPlayer {
 	
-	private static double[] coefficients = new double[3];
+	private static final Map<String, List<Double>> coefficientStore = new HashMap<>();
 	
-	private HashMap<Card, AtomicInteger> guessedButNotShown = new HashMap<>();
-	
-	public HeuristicPlayer(Player player) {
-		super(player);
+	static {
+		coefficientStore.put(Card.SCARLET_NAME, new ArrayList<Double>(3));
+		coefficientStore.put(Card.WHITE_NAME, new ArrayList<Double>(3));
+		coefficientStore.put(Card.PLUM_NAME, new ArrayList<Double>(3));
+		coefficientStore.put(Card.MUSTARD_NAME, new ArrayList<Double>(3));
+		coefficientStore.put(Card.PEACOCK_NAME, new ArrayList<Double>(3));
+		coefficientStore.put(Card.GREEN_NAME, new ArrayList<Double>(3));
 	}
 	
-	public static void determineCoefficients() {
-		List<ResultDE> results = Database.getInstance().getAllResults();
-		
-		coefficients[0] = fitCoefficient(results, 0);
-		coefficients[1] = fitCoefficient(results, 1);
-		coefficients[2] = fitCoefficient(results, 2);
-		
-		System.out.println("a = " + coefficients[0] + "; b = " + coefficients[1] +"; c = " + coefficients[2]);
+	public static void resetCoefficients() {
+		for(List<Double> coeffs : coefficientStore.values()) {
+			coeffs.clear();
+		}
 	}
 	
 	private static double fitCoefficient(List<ResultDE> results, int index) {
@@ -61,7 +61,45 @@ public class HeuristicPlayer extends AiPlayer {
 		return coeff[1] / (-2.0  * coeff[0]);
 	}
 	
-	public static double[] getCoefficients() {
+	// =======================================================================================================================================
+	// =======================================================================================================================================
+	// =======================================================================================================================================
+	
+	private double[] coefficients = new double[3];
+	
+	private HashMap<Card, AtomicInteger> guessedButNotShown = new HashMap<>();
+	
+	public HeuristicPlayer(Player player) {
+		super(player);
+		
+		determineCoefficients();
+	}
+	
+	private void determineCoefficients() {
+		List<Double> coeffs = coefficientStore.get(this.player.getSuspectName());
+		if(coeffs.isEmpty()) {
+			// no coefficients set for the suspect, so create them
+			List<ResultDE> results = Database.getInstance().getAllResults();
+			
+			coefficients[0] = fitCoefficient(results, 0);
+			coefficients[1] = fitCoefficient(results, 1);
+			coefficients[2] = fitCoefficient(results, 2);
+			
+			coeffs.add(coefficients[0]);
+			coeffs.add(coefficients[1]);
+			coeffs.add(coefficients[2]);
+			
+		} else {
+			// load existing
+			coefficients[0] = coeffs.get(0);
+			coefficients[1] = coeffs.get(1);
+			coefficients[2] = coeffs.get(2);
+		}
+		
+		//System.out.println(this.player.getSuspectName() + "; a = " + coefficients[0] + "; b = " + coefficients[1] +"; c = " + coefficients[2]);
+	}
+	
+	public double[] getCoefficients() {
 		return new double[] { coefficients[0], coefficients[1], coefficients[2] };
 	}
 	

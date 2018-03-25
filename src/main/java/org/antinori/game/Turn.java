@@ -8,6 +8,7 @@ import static org.antinori.game.Card.ROOM_STUDY;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import org.antinori.astar.Location;
 import org.antinori.multiplayer.MultiplayerFrame;
@@ -18,7 +19,7 @@ import cis579.ai.Solution;
 
 public class Turn {
 
-    public BufferedImage green_background = ClueMain.loadIcon("green-pattern-cropped.jpg");
+    public static final BufferedImage green_background = ClueMain.loadIcon("green-pattern-cropped.jpg");
 
     public static final int ACTION_VALID_ACCUSATION = 200;
     public static final int ACTION_INVALID_ACCUSATION = 500;
@@ -37,7 +38,9 @@ public class Turn {
     	
         ClueMain.mapView.setEnabled(false); // disable clicking on the map until
         // they roll the dice
-
+        
+        Collections.shuffle(players);
+        
         while (!gameOver) {
 
             for (Player player : players) {

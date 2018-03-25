@@ -82,6 +82,8 @@ public class ClueMain {
     public static final RoomIconPlacement playerIconPlacement = new RoomIconPlacement();
 
     public ClueMain() {
+    	ResultLogger.reset();
+    	
         try {
 
             map = new ClueMap(readMapTemplate());
@@ -202,81 +204,78 @@ public class ClueMain {
     }
 
     public static void startSinglePlayerGame() {
-
-        clue = new Clue();
-        turn = new Turn();
-
-        AiPlayerManager.createAiPlayers();
-        
-        //SinglePlayerSelectionDialog2 settingsDialog = new SinglePlayerSelectionDialog2(frame, true);
-        //settingsDialog.setVisible(true);
-
-        try {
-            clue.createDeck();
-
-            String msg = clue.dealShuffledDeck();
-
-            //System.out.println(msg);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        players = clue.getPlayers();
-
-        Location scarlet_location = map.getLocationAndSetColor(7, 24, COLOR_SCARLET);
-        Location mustard_location = map.getLocationAndSetColor(0, 17, COLOR_MUSTARD);
-        Location green_location = map.getLocationAndSetColor(13, 0, COLOR_GREEN);
-        Location plum_location = map.getLocationAndSetColor(23, 18, COLOR_PLUM);
-        Location white_location = map.getLocationAndSetColor(9, 0, COLOR_WHITE);
-        Location peacock_location = map.getLocationAndSetColor(23, 5, COLOR_PEACOCK);
-
-        // set locations for the current players
-        for (Player player : players) {
-
-            Notebook book = new Notebook(player);
-            player.setNotebook(book);
-
-            if (!player.isComputerPlayer()) {
-                setCurrentPlayer(player);
-                yourPlayer = player;
-                notebookpanel.setNotebook(book);
-            }
-
-            switch (player.getSuspectNumber()) {
-                case SUSPECT_SCARLET:
-                    player.setLocation(scarlet_location);
-                    break;
-                case SUSPECT_MUSTARD:
-                    player.setLocation(mustard_location);
-                    break;
-                case SUSPECT_GREEN:
-                    player.setLocation(green_location);
-                    break;
-                case SUSPECT_PLUM:
-                    player.setLocation(plum_location);
-                    break;
-                case SUSPECT_WHITE:
-                    player.setLocation(white_location);
-                    break;
-                case SUSPECT_PEACOCK:
-                    player.setLocation(peacock_location);
-                    break;
-            }
-            
-            AiPlayerManager.addPlayer(player);
-        }
-
-        mapView.repaint();
-
-        turn.startGame(players);
-
-        if(ResultLogger.runAgain()) {
-        	startSinglePlayerGame();
-        	return;
-        }
-        
-        ResultLogger.printResults();
+    	do {
+	        clue = new Clue();
+	        turn = new Turn();
+	
+	        AiPlayerManager.createAiPlayers();
+	        
+	        //SinglePlayerSelectionDialog2 settingsDialog = new SinglePlayerSelectionDialog2(frame, true);
+	        //settingsDialog.setVisible(true);
+	
+	        try {
+	            clue.createDeck();
+	
+	            String msg = clue.dealShuffledDeck();
+	
+	            //System.out.println(msg);
+	
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	
+	        players = clue.getPlayers();
+	
+	        Location scarlet_location = map.getLocationAndSetColor(7, 24, COLOR_SCARLET);
+	        Location mustard_location = map.getLocationAndSetColor(0, 17, COLOR_MUSTARD);
+	        Location green_location = map.getLocationAndSetColor(13, 0, COLOR_GREEN);
+	        Location plum_location = map.getLocationAndSetColor(23, 18, COLOR_PLUM);
+	        Location white_location = map.getLocationAndSetColor(9, 0, COLOR_WHITE);
+	        Location peacock_location = map.getLocationAndSetColor(23, 5, COLOR_PEACOCK);
+	
+	        // set locations for the current players
+	        for (Player player : players) {
+	
+	            Notebook book = new Notebook(player);
+	            player.setNotebook(book);
+	
+	            if (!player.isComputerPlayer()) {
+	                setCurrentPlayer(player);
+	                yourPlayer = player;
+	                notebookpanel.setNotebook(book);
+	            }
+	
+	            switch (player.getSuspectNumber()) {
+	                case SUSPECT_SCARLET:
+	                    player.setLocation(scarlet_location);
+	                    break;
+	                case SUSPECT_MUSTARD:
+	                    player.setLocation(mustard_location);
+	                    break;
+	                case SUSPECT_GREEN:
+	                    player.setLocation(green_location);
+	                    break;
+	                case SUSPECT_PLUM:
+	                    player.setLocation(plum_location);
+	                    break;
+	                case SUSPECT_WHITE:
+	                    player.setLocation(white_location);
+	                    break;
+	                case SUSPECT_PEACOCK:
+	                    player.setLocation(peacock_location);
+	                    break;
+	            }
+	            
+	            AiPlayerManager.addPlayer(player);
+	        }
+	
+	        mapView.repaint();
+	
+	        turn.startGame(players);
+	        
+    	} while(ResultLogger.runAgain());
+    	
+        //ResultLogger.printResults();
     }
 
     public static void setUpMultiplayerGame() {

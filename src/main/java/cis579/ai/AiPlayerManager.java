@@ -32,13 +32,11 @@ public class AiPlayerManager {
 	};
 	
 	public static PlayerType getPlayerType(String name) {
-		Optional<Player> player = aiPlayers.keySet().stream().filter(p -> p.getSuspectName().equals(name)).findFirst();
+		AiPlayer aiPlayer = getPlayer(name);
 		
-		if(!player.isPresent()) {
+		if(aiPlayer == null) {
 			return null;
 		}
-		
-		AiPlayer aiPlayer = aiPlayers.get(player.get());
 		
 		if(aiPlayer instanceof RandomPlayer)
 			return PlayerType.RANDOM;
@@ -47,6 +45,16 @@ public class AiPlayerManager {
 			return PlayerType.HEURISTIC;
 		
 		return null;
+	}
+	
+	public static AiPlayer getPlayer(String name) {
+		Optional<Player> player = aiPlayers.keySet().stream().filter(p -> p.getSuspectName().equals(name)).findFirst();
+		
+		if(!player.isPresent()) {
+			return null;
+		}
+		
+		return aiPlayers.get(player.get());
 	}
 	
 	public static void createAiPlayers() {
@@ -70,12 +78,7 @@ public class AiPlayerManager {
 		if(!player.isComputerPlayer())
 			return;
 
-		if(player.getSuspectName().equals(Card.SCARLET_NAME) || player.getSuspectName().equals(Card.MUSTARD_NAME) 
-				|| player.getSuspectName().equals(Card.PEACOCK_NAME)) {
-			aiPlayers.put(player, new HeuristicPlayer(player));
-		} else {
-			aiPlayers.put(player, new RandomPlayer(player));
-		}
+		aiPlayers.put(player, new HeuristicPlayer(player));
 	}
 	
 	/**
