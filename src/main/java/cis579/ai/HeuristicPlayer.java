@@ -1,6 +1,7 @@
 package cis579.ai;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,10 +11,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.antinori.astar.Location;
 import org.antinori.game.Card;
 import org.antinori.game.Player;
-import org.apache.commons.math3.fitting.PolynomialCurveFitter;
-import org.apache.commons.math3.fitting.WeightedObservedPoints;
-
-import cis579.ai.de.ResultDE;
 
 public class HeuristicPlayer extends AiPlayer {
 	
@@ -34,33 +31,6 @@ public class HeuristicPlayer extends AiPlayer {
 		}
 	}
 	
-	private static double fitCoefficient(List<ResultDE> results, int index) {
-		if(results.size() < 200000000) {
-			return Math.random() * 100;
-		}
-		
-		// Collect data.
-		final WeightedObservedPoints obs = new WeightedObservedPoints();
-		
-		for(ResultDE r : results) {
-			obs.add(r.getCoefficients()[index], r.getSuccessRate());
-		}
-		
-		// Instantiate a third-degree polynomial fitter.
-		final PolynomialCurveFitter fitter = PolynomialCurveFitter.create(2);
-
-		// Retrieve fitted parameters (coefficients of the polynomial function).
-		final double[] coeff = fitter.fit(obs.toList());
-		
-		System.out.println("coeff length = " + coeff.length);
-		
-		// a^2x + bx + c
-		// 2ax + b = 0
-		// x = -b / 2a 
-
-		return coeff[1] / (-2.0  * coeff[0]);
-	}
-	
 	// =======================================================================================================================================
 	// =======================================================================================================================================
 	// =======================================================================================================================================
@@ -79,11 +49,11 @@ public class HeuristicPlayer extends AiPlayer {
 		List<Double> coeffs = coefficientStore.get(this.player.getSuspectName());
 		if(coeffs.isEmpty()) {
 			// no coefficients set for the suspect, so create them
-			List<ResultDE> results = Database.getInstance().getAllResults();
+			//List<ResultDE> results = Database.getInstance().getAllResults();
 			
-			coefficients[0] = fitCoefficient(results, 0);
-			coefficients[1] = fitCoefficient(results, 1);
-			coefficients[2] = fitCoefficient(results, 2);
+			coefficients[0] = Math.floor(Math.random() * 100);
+			coefficients[1] = Math.floor(Math.random() * 100);
+			coefficients[2] = Math.floor(Math.random() * 100);
 			
 			coeffs.add(coefficients[0]);
 			coeffs.add(coefficients[1]);
@@ -155,7 +125,7 @@ public class HeuristicPlayer extends AiPlayer {
 	}
 
 	@Override
-	public Location decideLocation(ArrayList<Location> choices) {
+	public Location decideLocation(Collection<Location> choices) {
 		FilteredLocationChoices filteredChoices = this.filterChoices(choices);
 		
 		// check the secret passages and take it if the card is not known

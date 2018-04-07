@@ -63,36 +63,37 @@ public class ShowCardsRoutine {
                 }
             }
         }
+        
 
         //call the suspect over to the room and set their current location
         for (Player player : players) {
             if (player.getSuspectNumber() == suspect.getValue()) {
 
-                ClueMain.playerIconPlacement.removePlayerIcon(player.getSuspectNumber());
+                //ClueMain.playerIconPlacement.removePlayerIcon(player.getSuspectNumber());
 
                 //reset original color back to gray
-                ClueMain.map.setLocationColor(player.getLocation(), Color.gray);
+                //ClueMain.map.setLocationColor(player.getLocation(), Color.gray);
 
                 Location room_location = suggesting_player.getLocation();
 
-                ClueMain.playerIconPlacement.addPlayerIcon(room_location.getRoomId(), player.getSuspectNumber());
+                //ClueMain.playerIconPlacement.addPlayerIcon(room_location.getRoomId(), player.getSuspectNumber());
 
                 //set the players location 
                 player.setLocation(room_location);
                 //set location color to the players color
                 room_location.setColor(player.getPlayerColor());
 
-                ClueMain.multiplayerFrame.sendMoveEvent(player, player.getLocation().getX(), player.getLocation().getY(),
-                        room_location.getX(), room_location.getY(), player.getPlayerColor(), false);
+                //ClueMain.multiplayerFrame.sendMoveEvent(player, player.getLocation().getX(), player.getLocation().getY(),
+                //        room_location.getX(), room_location.getY(), player.getPlayerColor(), false);
 
 				//ClueMain.multiplayerFrame.showTimedDialogAlert(player.toString() + " has been called to the " + new Card(TYPE_ROOM,room_location.getRoomId()).toString());					
             }
         }
 
-        suggestion_text = String.format(ClueMain.formatter, suggesting_player.toString(), suspect.toString(), weapon.toString(), room.toString());
-        ClueMain.multiplayerFrame.sendSetSuggestionEvent(suspect, weapon, room, suggesting_player);
+        //suggestion_text = String.format(ClueMain.formatter, suggesting_player.toString(), suspect.toString(), weapon.toString(), room.toString());
+        //ClueMain.multiplayerFrame.sendSetSuggestionEvent(suspect, weapon, room, suggesting_player);
 
-        ClueMain.mapView.repaint();
+        //ClueMain.mapView.repaint();
 
     }
 

@@ -5,6 +5,7 @@ import static org.antinori.game.Card.NUM_SUSPECTS;
 import static org.antinori.game.Card.NUM_WEAPONS;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +32,10 @@ public abstract class AiPlayer {
 		this.unknownRooms = new TreeSet<Card>();
 		this.unknownSuspects = new TreeSet<Card>();
 		
+		init();
+	}
+	
+	protected void init() {
 		determineUnknowns();
 		
 		// initialize cards
@@ -72,7 +77,7 @@ public abstract class AiPlayer {
 	 * @param choices The possible locations that the player can go
 	 * @return After rolling, picks the best location based on the possible choices
 	 */
-	public abstract Location decideLocation(ArrayList<Location> choices);
+	public abstract Location decideLocation(Collection<Location> choices);
 	
 	private void determineUnknowns() {
 		Notebook notebook = this.player.getNotebook();
@@ -160,6 +165,10 @@ public abstract class AiPlayer {
 		return null;
 	}
 	
+	/**
+	 * @param choices these only contain the choices that were not already a room
+	 * @return best move
+	 */
 	protected Location findClosestLocationToAnUnknownRoom(List<Location> choices) {
 		// if only one choice, take it
 		if(choices.size() == 1) {
@@ -174,7 +183,7 @@ public abstract class AiPlayer {
 		// get all other rooms except the one they are in and the ones they already know are false
         ArrayList<Location> rooms = ClueMain.map.getAllRoomLocations(unknownRoomIds);
         
-        int closest = 100;
+        int closest = 100;        
 		// find a room location which is closest to them which is not in their hand or toggled
         Location newLocation = null;
         for (Location choice : choices) {
@@ -210,7 +219,7 @@ public abstract class AiPlayer {
 		 return this.isCardKnown(this.player.getLocation().getRoomCard());
 	}
 	
-	protected FilteredLocationChoices filterChoices(ArrayList<Location> choices){
+	protected FilteredLocationChoices filterChoices(Collection<Location> choices){
 		FilteredLocationChoices filtered = new FilteredLocationChoices(choices.size());
 		
 		// find any rooms in the possible choices

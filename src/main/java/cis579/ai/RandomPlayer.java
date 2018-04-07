@@ -1,6 +1,6 @@
 package cis579.ai;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -48,7 +48,7 @@ public class RandomPlayer extends AiPlayer {
 	}
 	
 	@Override
-	public Location decideLocation(ArrayList<Location> choices) {
+	public Location decideLocation(Collection<Location> choices) {
 		
 		//printUnknowns();
 		

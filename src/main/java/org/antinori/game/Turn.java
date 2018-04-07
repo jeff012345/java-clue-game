@@ -8,12 +8,14 @@ import static org.antinori.game.Card.ROOM_STUDY;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 
 import org.antinori.astar.Location;
 import org.antinori.multiplayer.MultiplayerFrame;
 
 import cis579.ai.AiPlayerManager;
+import cis579.ai.LocationFinder;
 import cis579.ai.ResultLogger;
 import cis579.ai.Solution;
 
@@ -50,11 +52,9 @@ public class Turn {
             	
                 ClueMain.setCurrentPlayer(player);
 
-                MultiplayerFrame.endTurnButton.setEnabled(false);
-                MultiplayerFrame.accuseButton.setEnabled(false);
+                //MultiplayerFrame.endTurnButton.setEnabled(false);
+                //MultiplayerFrame.accuseButton.setEnabled(false);
 
-                //if (player.isComputerPlayer()) {
-                	
             	ArrayList<Card> accusation = canMakeAccusationComputerPlayer(player);
             	if (accusation != null) {
             		if(ClueMain.clue.matchesVictimSet(accusation)) {
@@ -69,86 +69,9 @@ public class Turn {
                 }
             	
                 clickOnMapComputerPlayer(player);
+                
                 // let them make a suggestion
                 makeSuggestionComputerPlayer(player, players);
-
-                /*
-                } else {
-					// dialog for showing roll dice button, take secret passage
-                    // button or make suggestion button or make accusation
-
-                    if (player.hasMadeFalseAccusation()) {
-                        ClueMain.notebookpanel.setBystanderIndicator(true);
-                        JOptionPane.showMessageDialog(ClueMain.frame, "You made a false accusation and are bystanding to show cards.", "Accusation", JOptionPane.PLAIN_MESSAGE);
-                        ClueMain.multiplayerFrame.endTurnButton.doClick();
-                        continue;
-                    }
-
-                    Location location = player.getLocation();
-                    boolean isInRoom = location.getRoomId() != -1;
-                    boolean showSecret = (location.getRoomId() == ROOM_LOUNGE || location.getRoomId() == ROOM_STUDY || location.getRoomId() == ROOM_CONSERVATORY || location.getRoomId() == ROOM_KITCHEN);
-
-                    TurnDialog2 dialog1 = new TurnDialog2(player, true, showSecret, isInRoom);
-                    int action = dialog1.showDialog();
-
-                    if (action == ACTION_ROLLED_DICE) {
-
-                        // wait here until they click on the new location
-                        ClueMain.mapView.setEnabled(true);// let them click on
-                        // the map
-                        Location new_location = null;
-                        do {
-                            try {
-                                Thread.currentThread().sleep(1000);
-                                new_location = player.getLocation();
-                                // System.out.println("Waiting to click on map..");
-                            } catch (Exception e) {
-                            }
-                        } while (new_location == location);
-                        ClueMain.mapView.setEnabled(false);// disable map clicks
-                        // again
-
-						// see if they made it to a room and let them make a
-                        // suggestion
-                        isInRoom = new_location.getRoomId() != -1;
-                        if (isInRoom) {
-                            TurnDialog2 dialog2 = new TurnDialog2(player, false, false, true);
-                            dialog2.showDialog();
-                        }
-
-                    } else if (action == ACTION_TOOK_PASSAGE) {
-
-                        int current_room = location.getRoomId();
-                        switch (current_room) {
-                            case ROOM_LOUNGE:
-                                ClueMain.setPlayerLocationFromMapClick(ClueMain.map.getRoomLocation(ROOM_CONSERVATORY));
-                                break;
-                            case ROOM_STUDY:
-                                ClueMain.setPlayerLocationFromMapClick(ClueMain.map.getRoomLocation(ROOM_KITCHEN));
-                                break;
-                            case ROOM_CONSERVATORY:
-                                ClueMain.setPlayerLocationFromMapClick(ClueMain.map.getRoomLocation(ROOM_LOUNGE));
-                                break;
-                            case ROOM_KITCHEN:
-                                ClueMain.setPlayerLocationFromMapClick(ClueMain.map.getRoomLocation(ROOM_STUDY));
-                                break;
-                        }
-
-                        ClueMain.mapView.repaint();
-
-                        TurnDialog2 dialog2 = new TurnDialog2(player, false, false, true);
-                        dialog2.showDialog();
-
-                    } else if (action == ACTION_MADE_SUGGESTION) {
-                        // next player
-                    }
-
-                    MultiplayerFrame.accuseButton.setEnabled(true);
-
-                }
-                */
-
-                //waitEndTurnButton();
 
                 if (gameOver) {
                     break;
@@ -199,7 +122,7 @@ public class Turn {
     		// try move the player to the room which is not in their cards or toggled 
             Location location = player.getLocation();
             
-            ArrayList<Location> choices = ClueMain.map.highlightReachablePaths(location, ClueMain.pathfinder, roll);
+            Collection<Location> choices = LocationFinder.findChoices(location, roll);
             //ClueMain.mapView.repaint();
             
             new_location = AiPlayerManager.decideLocation(player, choices);
@@ -207,16 +130,11 @@ public class Turn {
     	
     	 if (new_location == null) {
              new_location = player.getLocation();// just keep them in the same room then
-             //JOptionPane.showMessageDialog(ClueMain.frame, player.toString() + " is staying in the same room.", "", JOptionPane.PLAIN_MESSAGE);
-
          } else {
 
              ClueMain.setPlayerLocationFromMapClick(new_location);
-             //JOptionPane.showMessageDialog(ClueMain.frame, player.toString() + " rolled a " 
-             //		+ roll 
-             //		+ (new_location == player.getLocation() ? " has stayed in the room." : " and has moved."), "", JOptionPane.PLAIN_MESSAGE);
-             ClueMain.mapView.repaint();
-             ClueMain.map.resetHighlights();
+             //ClueMain.mapView.repaint();
+             //ClueMain.map.resetHighlights();
          }
 
          return new_location;

@@ -14,9 +14,13 @@ import static org.antinori.game.Player.COLOR_SCARLET;
 import static org.antinori.game.Player.COLOR_WHITE;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.antinori.astar.Location;
 import org.antinori.game.Card;
@@ -28,8 +32,27 @@ public class AiPlayerManager {
 	private static final Map<Player, AiPlayer> aiPlayers = new HashMap<Player, AiPlayer>();
 	
 	public enum PlayerType {
-		HEURISTIC, RANDOM
+		HEURISTIC, RANDOM, ONE_UNKNOWN
 	};
+	
+	private static final HashMap<PlayerType, AtomicInteger> PLAYER_COUNTS = new HashMap<>();
+	private static int TOTAL_PLAYERS;
+	
+	static {
+		reset();
+	}
+	
+	public static void reset() {
+		PLAYER_COUNTS.clear();
+		//PLAYER_COUNTS.put(PlayerType.HEURISTIC, new AtomicInteger(4));
+		PLAYER_COUNTS.put(PlayerType.ONE_UNKNOWN, new AtomicInteger(4));
+		
+		// count the total players
+		TOTAL_PLAYERS = 0;
+		for(AtomicInteger cnt : PLAYER_COUNTS.values()) {
+			TOTAL_PLAYERS += cnt.get();
+		}
+	}
 	
 	public static PlayerType getPlayerType(String name) {
 		AiPlayer aiPlayer = getPlayer(name);
@@ -44,7 +67,10 @@ public class AiPlayerManager {
 		if(aiPlayer instanceof HeuristicPlayer)
 			return PlayerType.HEURISTIC;
 		
-		return null;
+		if(aiPlayer instanceof OneUnknownPlayer)
+			return PlayerType.ONE_UNKNOWN;
+		
+		throw new RuntimeException("Player type not initialized: " + aiPlayer.getClass().getSimpleName());
 	}
 	
 	public static AiPlayer getPlayer(String name) {
@@ -58,27 +84,45 @@ public class AiPlayerManager {
 	}
 	
 	public static void createAiPlayers() {
-		int players = 4;
-		
         ClueMain.clue.addPlayer(scarlet, "", COLOR_SCARLET, true);
         ClueMain.clue.addPlayer(green, "", COLOR_GREEN, true);
         ClueMain.clue.addPlayer(mustard, "", COLOR_MUSTARD, true);
         
-        if(players > 3)
+        if(TOTAL_PLAYERS > 3)
         	ClueMain.clue.addPlayer(plum, "", COLOR_PLUM, true);
         
-        if(players > 4)
+        if(TOTAL_PLAYERS > 4)
         	ClueMain.clue.addPlayer(peacock, "", COLOR_PEACOCK, true);
         
-        if(players == 6)
+        if(TOTAL_PLAYERS == 6)
         	ClueMain.clue.addPlayer(white, "", COLOR_WHITE, true);
 	}
 	
 	public static void addPlayer(Player player) {
 		if(!player.isComputerPlayer())
 			return;
-
-		aiPlayers.put(player, new HeuristicPlayer(player));
+		
+		Entry<PlayerType, AtomicInteger> playerCount = 
+				PLAYER_COUNTS.entrySet().stream().filter(entry -> entry.getValue().get() > 0).collect(Collectors.toList()).get(0);
+		
+		playerCount.getValue().decrementAndGet();
+		
+		AiPlayer newAi = null;
+		switch(playerCount.getKey()) {
+		case HEURISTIC:
+			newAi = new HeuristicPlayer(player);
+			break;
+		case ONE_UNKNOWN:
+			newAi = new OneUnknownPlayer(player);
+			break;
+		case RANDOM:
+			newAi = new RandomPlayer(player);
+			break;
+		default:
+			throw new RuntimeException("Player type not implemened: " + playerCount.getKey().toString());
+		}
+		
+		aiPlayers.put(player, newAi);
 	}
 	
 	/**
@@ -108,7 +152,7 @@ public class AiPlayerManager {
 	 * @param choices
 	 * @return Picks the best location based on the possible choices
 	 */
-	public static Location decideLocation(Player player, ArrayList<Location> choices) {
+	public static Location decideLocation(Player player, Collection<Location> choices) {
 		return aiPlayers.get(player).decideLocation(choices);
 	}
 	

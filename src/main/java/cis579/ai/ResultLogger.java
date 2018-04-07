@@ -6,16 +6,16 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.antinori.game.Card;
-import org.antinori.game.ClueMain;
 import org.antinori.game.Player;
 
+import cis579.ai.AiPlayerManager.PlayerType;
 import cis579.ai.de.ResultDE;
 
 public class ResultLogger {
 
 	private static final long START_TIME = System.currentTimeMillis();
 	
-	private static final int MAX_RUNS = 100;
+	private static final int MAX_RUNS = 500;
 	private static int runs = 1;
 	private static int turns = 1;
 	
@@ -30,6 +30,7 @@ public class ResultLogger {
 	
 	public static void nextTurn() {
 		turns++;
+		
 	}
 	
 	public static boolean runAgain() {
@@ -39,6 +40,8 @@ public class ResultLogger {
 			printResults();
 			reset();
 		}
+		
+		AiPlayerManager.reset();
 		
 		return true;
 	}
@@ -91,6 +94,10 @@ public class ResultLogger {
 			double wins = entry.getValue().intValue();
 			
 			System.out.println(name + " wins " + wins);
+			
+			if(AiPlayerManager.getPlayerType(name) != PlayerType.HEURISTIC) {
+				continue;
+			}
 			
 			HeuristicPlayer aiPlayer = (HeuristicPlayer) AiPlayerManager.getPlayer(name);
 			if(aiPlayer == null)

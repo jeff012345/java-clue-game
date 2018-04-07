@@ -361,11 +361,12 @@ public class ClueMain {
 
     public static void setPlayerLocationFromMapClick(Player player, Color color, Location from_location, Location to_location) {
 
-        playerIconPlacement.removePlayerIcon(player.getSuspectNumber());
-        playerIconPlacement.addPlayerIcon(to_location.getRoomId(), player.getSuspectNumber());
+        //playerIconPlacement.removePlayerIcon(player.getSuspectNumber());
+        //playerIconPlacement.addPlayerIcon(to_location.getRoomId(), player.getSuspectNumber());
 
         //reset original color back to gray
-        map.setLocationColor(from_location, Color.gray);
+        //map.setLocationColor(from_location, Color.gray);
+        
         //set the players location 
         player.setLocation(to_location);
         //set location color to the players color

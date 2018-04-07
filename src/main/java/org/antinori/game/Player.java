@@ -8,8 +8,6 @@ import org.antinori.astar.Location;
 
 import com.smartfoxserver.v2.protocol.serialization.SerializableSFSType;
 
-import cis579.ai.AiPlayerManager;
-
 public class Player implements SerializableSFSType {
 
     private int suspectNumber = 0;

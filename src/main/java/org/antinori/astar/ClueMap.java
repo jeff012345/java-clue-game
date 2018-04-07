@@ -10,9 +10,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import cis579.ai.LocationFinder;
+
 public class ClueMap implements Serializable {
 
-    private final Location[][] nodes;
+	private static final long serialVersionUID = -6224399947354423040L;
+	
+	private final Location[][] nodes;
     private int hbound = 0;
     private int vbound = 0;
     
@@ -197,25 +201,26 @@ public class ClueMap implements Serializable {
         return doors;
     }
 
-    public ArrayList<Location> highlightReachablePaths(Location starting_location, PathFinder<Location> pathfinder, int dice_roll) {
-
+    public Collection<Location> highlightReachablePaths(Location starting_location, PathFinder<Location> pathfinder, int dice_roll) {
+    	
         Collection<Location> locs = getLocations();
 
         ArrayList<Location> choices = new ArrayList<Location>();
 
         ArrayList<Location> doors = getAllDoorLocationsForRoom(starting_location.getRoomId());
-
+        
+        
         if (doors == null) {
             for (Location loc : locs) {
                 List<Location> path2 = pathfinder.findPath(locs, starting_location, Collections.singleton(loc));
                 if (path2 != null && path2.size() == dice_roll + 1) {
                     Location l = path2.get(path2.size() - 1);
-                    l.setHighlighted(true);
+                    //l.setHighlighted(true);
                     choices.add(l);
                 }
                 if (path2 != null && loc.isRoom() && path2.size() < dice_roll + 1) {
                     Location l = path2.get(path2.size() - 1);
-                    l.setHighlighted(true);
+                    //l.setHighlighted(true);
                     choices.add(l);
                 }
             }
@@ -225,20 +230,19 @@ public class ClueMap implements Serializable {
                     List<Location> path2 = pathfinder.findPath(locs, door, Collections.singleton(loc));
                     if (path2 != null && path2.size() == dice_roll + 1) {
                         Location l = path2.get(path2.size() - 1);
-                        l.setHighlighted(true);
+                        //l.setHighlighted(true);
                         choices.add(l);
                     }
                     if (path2 != null && loc.isRoom() && path2.size() < dice_roll + 1) {
                         Location l = path2.get(path2.size() - 1);
-                        l.setHighlighted(true);
+                        //l.setHighlighted(true);
                         choices.add(l);
                     }
                 }
             }
         }
-
+        
         return choices;
-
     }
 
     public void resetHighlights() {

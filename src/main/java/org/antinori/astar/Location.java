@@ -1,8 +1,6 @@
 package org.antinori.astar;
 
 import java.awt.Color;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +9,9 @@ import org.antinori.game.Card;
 
 public class Location implements Node<Location>, Serializable {
 
-    private final int x;
+	private static final long serialVersionUID = -6775415845109915655L;
+	
+	private final int x;
     private final int y;
     private int height;
     private boolean blocked;
@@ -19,8 +19,12 @@ public class Location implements Node<Location>, Serializable {
     private boolean isRoom;
     private int roomId = -1;
     private Color color = Color.gray;
+    
+    private long visited;
 
     private transient List<Location> neighbors;
+    
+    private ArrayList<Location> realNeighbors = null;
 
     public Location(int x, int y) {
         this.x = x;
@@ -126,8 +130,15 @@ public class Location implements Node<Location>, Serializable {
         return Math.abs(diff) + distance;
     }
 
+    /**
+     * @return returns neighbors that are not blocked
+     */
     public Iterable<Location> neighbors() {
-        List<Location> realNeighbors = new ArrayList<Location>();
+    	if(this.realNeighbors != null) {
+    		return this.realNeighbors;
+    	}
+    	
+        this.realNeighbors = new ArrayList<Location>();
         if (!blocked) {
             for (Location loc : neighbors) {
                 if (!loc.blocked) {
@@ -136,7 +147,7 @@ public class Location implements Node<Location>, Serializable {
             }
         }
 
-        return realNeighbors;
+        return this.realNeighbors;
     }
 
     public void addNeighbor(Location l) {
@@ -152,4 +163,13 @@ public class Location implements Node<Location>, Serializable {
         return "Location [" + x + "][" + y + "]; Room = " + (isRoom ? getRoomCard().toString() : roomId);
     }
 
+    public boolean visit(long vistorId) {
+    	if(vistorId == this.visited) {
+    		return true;
+    	}
+    	
+    	this.visited = vistorId;
+    	return false;
+    }
+    
 }
