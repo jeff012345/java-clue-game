@@ -18,6 +18,8 @@ public class CardTracker {
 	
 	private static final HashMap<Player, Set<Card>> notInHand = new HashMap<>();
 	
+	private static int SUGGESTIONS_MADE = 0;
+	
 	static {
 		getAllCards();
 		reset();
@@ -31,12 +33,16 @@ public class CardTracker {
 		for(Card c : ALL_CARDS) {
 			TIMES_GUESSED.put(c, new AtomicInteger(0));
 		}
+		
+		SUGGESTIONS_MADE = 0;
 	}
 	
 	public static void suggestionMade(ArrayList<Card> suggestion) {
 		for(Card c : suggestion) {
 			TIMES_GUESSED.get(c).incrementAndGet();
 		}
+		
+		SUGGESTIONS_MADE++;
 	}
 	
 	public static void playerHasNoCardsToShow(Player player, ArrayList<Card> suggestion) {
@@ -80,4 +86,7 @@ public class CardTracker {
         }
 	}
 	
+	public static double suggestionsMade() {
+		return SUGGESTIONS_MADE;
+	}
 }

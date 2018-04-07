@@ -57,9 +57,9 @@ public class HeuristicPlayer extends AiPlayer {
 			Random rand2 = new Random(UUID.randomUUID().getLeastSignificantBits());
 			Random rand3 = new Random(UUID.randomUUID().getMostSignificantBits());
 			
-			coefficients[0] = rand1.nextInt(100);
-			coefficients[1] = rand2.nextInt(100);
-			coefficients[2] = rand3.nextInt(100);
+			coefficients[0] = rand1.nextInt(100) / 100d;
+			coefficients[1] = rand2.nextInt(100) / 100d;
+			coefficients[2] = rand3.nextInt(100) / 100d;
 			
 			coeffs.add(coefficients[0]);
 			coeffs.add(coefficients[1]);
@@ -206,15 +206,22 @@ public class HeuristicPlayer extends AiPlayer {
 			}
 		}
 		
+		if(best == null) {
+			best = cards.iterator().next();
+		}
+		
 		return best;
 	}
 	
 	private double evaluateCard(Card c) {
 		int timesGuessed = CardTracker.timesGuessed(c);
-		int isNoShow = CardTracker.isNoShow(c) ? 1 : 0;
+		double isNoShow = CardTracker.isNoShow(c) ? 1 : 0.5;
 		int timesNotShown = guessedButNotShown.containsKey(c) ? guessedButNotShown.get(c).get() : 0;
+		double suggestionsMade = CardTracker.suggestionsMade();
 		
-		return coefficients[0] * timesGuessed + coefficients[1] * isNoShow + coefficients[2] * timesNotShown;
+		return coefficients[0] * (timesGuessed / suggestionsMade) 
+				+ coefficients[1] * isNoShow 
+				+ coefficients[2] * (timesNotShown / suggestionsMade);
 	}
 
 }
