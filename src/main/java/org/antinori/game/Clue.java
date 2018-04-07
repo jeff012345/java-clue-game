@@ -17,6 +17,8 @@ import org.antinori.multiplayer.DealRequestHandler;
 
 import com.smartfoxserver.v2.entities.data.SFSObject;
 
+import cis579.ai.ResultLogger;
+
 public class Clue extends SFSObject {
 
     private ArrayList<Player> players = new ArrayList<Player>(6);
@@ -46,17 +48,37 @@ public class Clue extends SFSObject {
         }
 
         // shuffle it
-        Random rand = new Random(System.currentTimeMillis() % 389);
-        for (int i = 0; i < TOTAL; i++) {
-            int r = rand.nextInt(deck.size());
-            Card c = deck.remove(r);
-            shuffled.add(c);
+        int w, r, s;
+        
+        if(ResultLogger.SHUFFLE_DECK) {
+	        Random rand = new Random(System.currentTimeMillis() % 389);
+	        
+	        for (int i = 0; i < TOTAL; i++) {
+	            int a = rand.nextInt(deck.size());
+	            Card c = deck.remove(a);
+	            shuffled.add(c);
+	        }
+	
+	        //pull the victim set
+	        w = rand.nextInt(NUM_WEAPONS);
+	        r = rand.nextInt(NUM_ROOMS);
+	        s = rand.nextInt(NUM_SUSPECTS);
+        } else {
+        	// 6 + 9 + 6 = 21 
+        	int[] order = { 2,20,18,19,17,8,1,7,12,14,9,15,16,0,13,6,5,10,11,3,4 }; 
+        	
+        	for(int i = 0; i < order.length; i++) {
+        		shuffled.add(deck.get(order[i]));
+        	}
+        	
+        	if(shuffled.size() != deck.size()) {
+        		throw new RuntimeException("you shuffled the deck wrong");
+        	}
+        	
+        	w = 1;
+        	r = 1;
+        	s = 1;
         }
-
-        //pull the victim set
-        int w = rand.nextInt(NUM_WEAPONS);
-        int r = rand.nextInt(NUM_ROOMS);
-        int s = rand.nextInt(NUM_SUSPECTS);
 
         Card weapon = new Card(TYPE_WEAPON, w);
         Card suspect = new Card(TYPE_SUSPECT, s);
@@ -116,12 +138,12 @@ public class Clue extends SFSObject {
 
     public String dealShuffledDeck() throws Exception {
 
-        if (shuffled == null) {
-            throw new Exception("Shuffled Deck is null.");
+        if (shuffled == null || shuffled.isEmpty()) {
+            throw new RuntimeException("Shuffled Deck is null.");
         }
 
-        if (players == null) {
-            throw new Exception("Players is null.");
+        if (players == null || players.isEmpty()) {
+            throw new RuntimeException("Players is null.");
         }
 
         //deal the cards

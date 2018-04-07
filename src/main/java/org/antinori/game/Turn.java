@@ -14,6 +14,7 @@ import java.util.Collections;
 import org.antinori.astar.Location;
 import org.antinori.multiplayer.MultiplayerFrame;
 
+import cis579.ai.AiPlayer;
 import cis579.ai.AiPlayerManager;
 import cis579.ai.LocationFinder;
 import cis579.ai.ResultLogger;
@@ -62,6 +63,7 @@ public class Turn {
                         ResultLogger.logResult(player, accusation);
                         break;
             		} else {
+            			AiPlayer aiPlayer = AiPlayerManager.getPlayer(player.getSuspectName());
         				ResultLogger.wrongAccusation(player);
         				player.setHasMadeFalseAccusation();
         				continue;

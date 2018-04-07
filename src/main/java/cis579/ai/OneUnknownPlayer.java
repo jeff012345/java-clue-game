@@ -58,7 +58,7 @@ public class OneUnknownPlayer extends AiPlayer {
 
 	@Override
 	public void addCardToHand(Card card) {
-		super.onShownCard(null, null, card);
+		super.addCardToHand(card);
 		
 		switch(card.getType()) {
         case Card.TYPE_ROOM:

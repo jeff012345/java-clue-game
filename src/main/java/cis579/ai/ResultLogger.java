@@ -15,7 +15,7 @@ public class ResultLogger {
 
 	private static final long START_TIME = System.currentTimeMillis();
 	
-	private static final int MAX_RUNS = 500;
+	private static final int MAX_RUNS = 250;
 	private static int runs = 1;
 	private static int turns = 1;
 	
@@ -23,6 +23,8 @@ public class ResultLogger {
 	private static final HashMap<Integer, Integer> TURNS_PER_GAME = new HashMap<Integer, Integer>();
 	
 	private static final Database database = Database.getInstance();
+	
+	public static final boolean SHUFFLE_DECK = false;
 	
 	static {
 		reset();
@@ -91,13 +93,13 @@ public class ResultLogger {
 		
 		for(Entry<String, Integer> entry : WINS_PER_SUSPECT.entrySet()) {
 			String name = entry.getKey();
-			double wins = entry.getValue().intValue();
-			
-			System.out.println(name + " wins " + wins);
 			
 			if(AiPlayerManager.getPlayerType(name) != PlayerType.HEURISTIC) {
 				continue;
 			}
+			
+			double wins = entry.getValue().intValue();
+			//System.out.println(name + " wins " + wins);
 			
 			HeuristicPlayer aiPlayer = (HeuristicPlayer) AiPlayerManager.getPlayer(name);
 			if(aiPlayer == null)

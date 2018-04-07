@@ -60,7 +60,7 @@ public abstract class AiPlayer {
 	public abstract boolean shouldRoll();
 	
 	/**
-	 * event is triggered when the suggestion has no cards to show
+	 * event is triggered when all opponents have no cards to show in player's suggestion
 	 */
 	public abstract void onAllPlayersNoCardsToShow(Solution suggestion);
 	

@@ -5,7 +5,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.antinori.astar.Location;
@@ -50,15 +52,20 @@ public class HeuristicPlayer extends AiPlayer {
 		if(coeffs.isEmpty()) {
 			// no coefficients set for the suspect, so create them
 			//List<ResultDE> results = Database.getInstance().getAllResults();
+
+			Random rand1 = new Random(UUID.randomUUID().getMostSignificantBits());
+			Random rand2 = new Random(UUID.randomUUID().getLeastSignificantBits());
+			Random rand3 = new Random(UUID.randomUUID().getMostSignificantBits());
 			
-			coefficients[0] = Math.floor(Math.random() * 100);
-			coefficients[1] = Math.floor(Math.random() * 100);
-			coefficients[2] = Math.floor(Math.random() * 100);
+			coefficients[0] = rand1.nextInt(100);
+			coefficients[1] = rand2.nextInt(100);
+			coefficients[2] = rand3.nextInt(100);
 			
 			coeffs.add(coefficients[0]);
 			coeffs.add(coefficients[1]);
 			coeffs.add(coefficients[2]);
 			
+			System.out.println("Reset coeffs: " + coefficients[0] + "," + coefficients[1] + "," + coefficients[2]);
 		} else {
 			// load existing
 			coefficients[0] = coeffs.get(0);
@@ -113,10 +120,6 @@ public class HeuristicPlayer extends AiPlayer {
 		
 		this.unknownWeapons.clear();
 		this.unknownWeapons.add(suggestion.weapon);
-		
-		// TODO put a hook for tracking all guesses
-		// TODO track all player's guesses
-		// TODO keep counts of how many times a card is guessed
 		
 		// TODO when another player guesses something and no one else shows a card
 		//		we need to decide the most probable solution and make an accusation

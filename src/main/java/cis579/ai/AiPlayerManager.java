@@ -35,23 +35,20 @@ public class AiPlayerManager {
 		HEURISTIC, RANDOM, ONE_UNKNOWN
 	};
 	
-	private static final HashMap<PlayerType, AtomicInteger> PLAYER_COUNTS = new HashMap<>();
-	private static int TOTAL_PLAYERS;
+	private static final HashMap<Card, PlayerType> PLAYERS = new HashMap<>();
 	
 	static {
 		reset();
 	}
 	
 	public static void reset() {
-		PLAYER_COUNTS.clear();
-		//PLAYER_COUNTS.put(PlayerType.HEURISTIC, new AtomicInteger(4));
-		PLAYER_COUNTS.put(PlayerType.ONE_UNKNOWN, new AtomicInteger(4));
+		PLAYERS.clear();
 		
-		// count the total players
-		TOTAL_PLAYERS = 0;
-		for(AtomicInteger cnt : PLAYER_COUNTS.values()) {
-			TOTAL_PLAYERS += cnt.get();
-		}
+		PLAYERS.put(scarlet, PlayerType.HEURISTIC);
+		
+		PLAYERS.put(plum, PlayerType.ONE_UNKNOWN);
+		PLAYERS.put(green, PlayerType.ONE_UNKNOWN);
+		PLAYERS.put(mustard, PlayerType.ONE_UNKNOWN);
 	}
 	
 	public static PlayerType getPlayerType(String name) {
@@ -84,31 +81,19 @@ public class AiPlayerManager {
 	}
 	
 	public static void createAiPlayers() {
-        ClueMain.clue.addPlayer(scarlet, "", COLOR_SCARLET, true);
-        ClueMain.clue.addPlayer(green, "", COLOR_GREEN, true);
-        ClueMain.clue.addPlayer(mustard, "", COLOR_MUSTARD, true);
-        
-        if(TOTAL_PLAYERS > 3)
-        	ClueMain.clue.addPlayer(plum, "", COLOR_PLUM, true);
-        
-        if(TOTAL_PLAYERS > 4)
-        	ClueMain.clue.addPlayer(peacock, "", COLOR_PEACOCK, true);
-        
-        if(TOTAL_PLAYERS == 6)
-        	ClueMain.clue.addPlayer(white, "", COLOR_WHITE, true);
+		for(Card playerCard : PLAYERS.keySet()) {
+			ClueMain.clue.addPlayer(playerCard, "", COLOR_WHITE, true);
+		}
 	}
 	
 	public static void addPlayer(Player player) {
 		if(!player.isComputerPlayer())
 			return;
 		
-		Entry<PlayerType, AtomicInteger> playerCount = 
-				PLAYER_COUNTS.entrySet().stream().filter(entry -> entry.getValue().get() > 0).collect(Collectors.toList()).get(0);
-		
-		playerCount.getValue().decrementAndGet();
+		PlayerType type = PLAYERS.get(player.getPlayerCard());
 		
 		AiPlayer newAi = null;
-		switch(playerCount.getKey()) {
+		switch(type) {
 		case HEURISTIC:
 			newAi = new HeuristicPlayer(player);
 			break;
@@ -119,7 +104,7 @@ public class AiPlayerManager {
 			newAi = new RandomPlayer(player);
 			break;
 		default:
-			throw new RuntimeException("Player type not implemened: " + playerCount.getKey().toString());
+			throw new RuntimeException("Player type not implemened: " + type.toString());
 		}
 		
 		aiPlayers.put(player, newAi);
