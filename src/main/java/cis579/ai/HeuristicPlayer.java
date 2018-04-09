@@ -1,5 +1,12 @@
 package cis579.ai;
 
+import static org.antinori.game.Card.NUM_ROOMS;
+import static org.antinori.game.Card.NUM_SUSPECTS;
+import static org.antinori.game.Card.NUM_WEAPONS;
+import static org.antinori.game.Card.TYPE_ROOM;
+import static org.antinori.game.Card.TYPE_SUSPECT;
+import static org.antinori.game.Card.TYPE_WEAPON;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -15,9 +23,11 @@ import org.antinori.game.Card;
 import org.antinori.game.Player;
 
 public class HeuristicPlayer extends AiPlayer {
-	
+
 	private static final Map<String, List<Double>> coefficientStore = new HashMap<>();
-	
+
+	private static final Set<Card> DECK = new TreeSet<>();
+
 	static {
 		coefficientStore.put(Card.SCARLET_NAME, new ArrayList<Double>(3));
 		coefficientStore.put(Card.WHITE_NAME, new ArrayList<Double>(3));
@@ -25,75 +35,91 @@ public class HeuristicPlayer extends AiPlayer {
 		coefficientStore.put(Card.MUSTARD_NAME, new ArrayList<Double>(3));
 		coefficientStore.put(Card.PEACOCK_NAME, new ArrayList<Double>(3));
 		coefficientStore.put(Card.GREEN_NAME, new ArrayList<Double>(3));
+
+		// make deck of cards
+		for (int i = 0; i < NUM_ROOMS; i++) {
+			DECK.add(new Card(TYPE_ROOM, i));
+		}
+		for (int i = 0; i < NUM_SUSPECTS; i++) {
+			DECK.add(new Card(TYPE_SUSPECT, i));
+		}
+		for (int i = 0; i < NUM_WEAPONS; i++) {
+			DECK.add(new Card(TYPE_WEAPON, i));
+		}
 	}
-	
+
 	public static void resetCoefficients() {
-		for(List<Double> coeffs : coefficientStore.values()) {
+		for(final List<Double> coeffs : coefficientStore.values()) {
 			coeffs.clear();
 		}
 	}
-	
+
 	// =======================================================================================================================================
 	// =======================================================================================================================================
 	// =======================================================================================================================================
-	
+
 	private double[] coefficients = new double[3];
-	
+	private double[] signals = null;
+
 	private HashMap<Card, AtomicInteger> guessedButNotShown = new HashMap<>();
-	
-	public HeuristicPlayer(Player player) {
+
+	public HeuristicPlayer(final Player player) {
 		super(player);
-		
-		determineCoefficients();
+
+		DECK.stream().forEach(card -> {
+			this.guessedButNotShown.put(card, new AtomicInteger(0));
+		});
+
+		this.determineCoefficients();
 	}
-	
+
 	private void determineCoefficients() {
-		List<Double> coeffs = coefficientStore.get(this.player.getSuspectName());
+		final List<Double> coeffs = coefficientStore.get(this.player.getSuspectName());
 		if(coeffs.isEmpty()) {
 			// no coefficients set for the suspect, so create them
 			//List<ResultDE> results = Database.getInstance().getAllResults();
 
-			Random rand1 = new Random(UUID.randomUUID().getMostSignificantBits());
-			Random rand2 = new Random(UUID.randomUUID().getLeastSignificantBits());
-			Random rand3 = new Random(UUID.randomUUID().getMostSignificantBits());
-			
-			coefficients[0] = rand1.nextInt(100) / 100d;
-			coefficients[1] = rand2.nextInt(100) / 100d;
-			coefficients[2] = rand3.nextInt(100) / 100d;
-			
-			coeffs.add(coefficients[0]);
-			coeffs.add(coefficients[1]);
-			coeffs.add(coefficients[2]);
-			
-			System.out.println("Reset coeffs: " + coefficients[0] + "," + coefficients[1] + "," + coefficients[2]);
+			final Random rand1 = new Random(UUID.randomUUID().getMostSignificantBits());
+			final Random rand2 = new Random(UUID.randomUUID().getLeastSignificantBits());
+			final Random rand3 = new Random(UUID.randomUUID().getMostSignificantBits());
+
+			this.coefficients[0] = rand1.nextInt(100) / 100d;
+			this.coefficients[1] = rand2.nextInt(100) / 100d;
+			this.coefficients[2] = rand3.nextInt(100) / 100d;
+
+			coeffs.add(this.coefficients[0]);
+			coeffs.add(this.coefficients[1]);
+			coeffs.add(this.coefficients[2]);
+
+			System.out.println("Reset coeffs: " + this.coefficients[0] + "," + this.coefficients[1] + "," + this.coefficients[2]);
 		} else {
 			// load existing
-			coefficients[0] = coeffs.get(0);
-			coefficients[1] = coeffs.get(1);
-			coefficients[2] = coeffs.get(2);
+			this.coefficients[0] = coeffs.get(0);
+			this.coefficients[1] = coeffs.get(1);
+			this.coefficients[2] = coeffs.get(2);
 		}
-		
+
 		//System.out.println(this.player.getSuspectName() + "; a = " + coefficients[0] + "; b = " + coefficients[1] +"; c = " + coefficients[2]);
 	}
-	
+
 	public double[] getCoefficients() {
-		return new double[] { coefficients[0], coefficients[1], coefficients[2] };
+		return new double[] { this.coefficients[0], this.coefficients[1], this.coefficients[2] };
 	}
-	
+
 	@Override
 	public Solution getSuggestion() {
-		Solution guess = this.suggestionForCurrentRoom();
-		
-		guess.weapon = pickWeapon();
-		guess.suspect = pickSuspect();
-		
+		final Solution guess = this.suggestionForCurrentRoom();
+
+		guess.weapon = this.pickWeapon();
+		guess.suspect = this.pickSuspect();
+
 		return guess;
 	}
 
 	@Override
 	public Solution canMakeAccusation() {
 		if(this.unknownRooms.size() == 1 && this.unknownWeapons.size() == 1 && this.unknownSuspects.size() == 1) {
-			Solution solution = new Solution();
+			final Solution solution = new Solution();
 			solution.room = this.unknownRooms.stream().findFirst().get();
 			solution.weapon = this.unknownWeapons.stream().findFirst().get();
 			solution.suspect = this.unknownSuspects.stream().findFirst().get();
@@ -111,16 +137,16 @@ public class HeuristicPlayer extends AiPlayer {
 	}
 
 	@Override
-	public void onAllPlayersNoCardsToShow(Solution suggestion) {
+	public void onAllPlayersNoCardsToShow(final Solution suggestion) {
 		this.unknownRooms.clear();
 		this.unknownRooms.add(suggestion.room);
-		
+
 		this.unknownSuspects.clear();
 		this.unknownSuspects.add(suggestion.suspect);
-		
+
 		this.unknownWeapons.clear();
 		this.unknownWeapons.add(suggestion.weapon);
-		
+
 		// TODO when another player guesses something and no one else shows a card
 		//		we need to decide the most probable solution and make an accusation
 		//		using that solution the next turn
@@ -128,100 +154,126 @@ public class HeuristicPlayer extends AiPlayer {
 	}
 
 	@Override
-	public Location decideLocation(Collection<Location> choices) {
-		FilteredLocationChoices filteredChoices = this.filterChoices(choices);
-		
+	public Location decideLocation(final Collection<Location> choices) {
+		final FilteredLocationChoices filteredChoices = this.filterChoices(choices);
+
 		// check the secret passages and take it if the card is not known
-		Location shortcut = this.canTakeShortcut();
+		final Location shortcut = this.canTakeShortcut();
 		if(shortcut != null) {
-			Card roomCard = shortcut.getRoomCard();
+			final Card roomCard = shortcut.getRoomCard();
 			if(!this.isCardKnown(roomCard)) {
 				return shortcut;
 			}
 		}
-		
+
 		if(!filteredChoices.roomChoices.isEmpty()) {
 			// going into a room is possible, so pick one if it's not already known
-			for(Location choice : filteredChoices.roomChoices) {
+			for(final Location choice : filteredChoices.roomChoices) {
 				if(!this.isCardKnown(choice.getRoomCard())) {
-					// pick the first room that the player doesn't know 
+					// pick the first room that the player doesn't know
 					return choice;
 				}
 			}
-			
+
 			// all possible rooms are known, so move somewhere else
 		}
-		
+
 		return this.findClosestLocationToAnUnknownRoom(filteredChoices.otherChoices);
 	}
-	
+
 	@Override
-	public void onShownCard(Player showingPlayer, List<Card> suggestion, Card card) {
+	public void onShownCard(final Player showingPlayer, final List<Card> suggestion, final Card card) {
 		super.onShownCard(showingPlayer, suggestion, card);
-		
+
 		if(showingPlayer == null)
 			return;
-		
+
 		suggestion.stream().filter(c -> !c.equals(card)).forEach(c -> {
-			AtomicInteger cnt = guessedButNotShown.get(c);
+			final AtomicInteger cnt = this.guessedButNotShown.get(c);
 			if (cnt == null) {
-				guessedButNotShown.put(c, new AtomicInteger(1));
+				this.guessedButNotShown.put(c, new AtomicInteger(1));
 			} else {
 				cnt.incrementAndGet();
 			}
 		});
 	}
-	
+
 	@Override
-	public void onPlayerNoCardsToShow(Player showingPlayer, List<Card> suggestion) {
+	public void onPlayerNoCardsToShow(final Player showingPlayer, final List<Card> suggestion) {
 		suggestion.stream().forEach(c -> {
-			AtomicInteger cnt = guessedButNotShown.get(c);
+			final AtomicInteger cnt = this.guessedButNotShown.get(c);
 			if (cnt == null) {
-				guessedButNotShown.put(c, new AtomicInteger(1));
+				this.guessedButNotShown.put(c, new AtomicInteger(1));
 			} else {
 				cnt.incrementAndGet();
 			}
 		});
 	}
-	
+
 	private Card pickWeapon() {
-		return pickBestCard(this.unknownWeapons);
+		return this.pickBestCard(this.unknownWeapons);
 	}
-	
+
 	private Card pickSuspect() {
-		return pickBestCard(this.unknownSuspects);
+		return this.pickBestCard(this.unknownSuspects);
 	}
-	
-	private Card pickBestCard(Set<Card> cards) {
+
+	private Card pickBestCard(final Set<Card> cards) {
 		Card best = null;
 		double maxValue = -1;
 		double value;
-		
-		for(Card c : cards) {
-			value = evaluateCard(c);
-			
+
+		for(final Card c : cards) {
+			value = this.evaluateCard(c);
+
 			if(value > maxValue) {
 				maxValue = value;
 				best = c;
 			}
 		}
-		
+
 		if(best == null) {
 			best = cards.iterator().next();
 		}
-		
+
+		// update learning values
+		final double[] previousSignals = this.signals;
+		this.storeSignalValues(best);
+
+		if(previousSignals != null) {
+			Evaluator.updateQ(this.getPlayer(), previousSignals, this.signals);
+		}
+
 		return best;
 	}
-	
-	private double evaluateCard(Card c) {
-		int timesGuessed = CardTracker.timesGuessed(c);
-		double isNoShow = CardTracker.isNoShow(c) ? 1 : 0.5;
-		int timesNotShown = guessedButNotShown.containsKey(c) ? guessedButNotShown.get(c).get() : 0;
-		double suggestionsMade = CardTracker.suggestionsMade();
-		
-		return coefficients[0] * (timesGuessed / suggestionsMade) 
-				+ coefficients[1] * isNoShow 
-				+ coefficients[2] * (timesNotShown / suggestionsMade);
+
+	private void storeSignalValues(final Card card) {
+		this.signals = this.calculateSignals(card);
 	}
 
+	private double evaluateCard(final Card c) {
+		final double[] signals = this.calculateSignals(c);
+		return Evaluator.evaluate(signals);
+
+		//return this.coefficients[0] * signals[0] + this.coefficients[1] * signals[1]
+		//		+ this.coefficients[2] * signals[2];
+	}
+
+	private double[] calculateSignals(final Card card) {
+		final int timesGuessed = CardTracker.timesGuessed(card);
+		final double isNoShow = CardTracker.isNoShow(card) ? 1 : 0.5;
+		final double suggestionsMade = CardTracker.suggestionsMade() + 1;
+		final double averageTimesGuessed = CardTracker.averageTimesGuessed();
+
+		final int timesNotShown = this.guessedButNotShown.get(card).get();
+
+		final double sum = this.guessedButNotShown.values().stream().mapToInt(AtomicInteger::get).sum();
+		final double avgTimesNotShown = sum / this.guessedButNotShown.size();
+
+		return new double[] {
+				(timesGuessed - averageTimesGuessed) / suggestionsMade,
+				isNoShow,
+				(timesNotShown - avgTimesNotShown) / suggestionsMade
+		};
+	}
 }

@@ -25,6 +25,8 @@ public class Clue extends SFSObject {
 
     private ArrayList<Card> shuffled = new ArrayList<Card>(TOTAL);
     private ArrayList<Card> victimSet = new ArrayList<Card>(3);
+    
+    private Player winner = null;
 
     private DealRequestHandler multiplayerDealer = null;
 
@@ -229,5 +231,16 @@ public class Clue extends SFSObject {
         }
         return false;
     }
-
+    
+    public ArrayList<Card> getVictimSet(){
+    	return this.victimSet;
+    }
+    
+    public Player getWinner() {
+    	return this.winner;
+    }
+    
+    public void setWinner(Player player) {
+    	this.winner = player;
+    }
 }

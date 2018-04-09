@@ -10,176 +10,210 @@ import com.smartfoxserver.v2.protocol.serialization.SerializableSFSType;
 
 public class Player implements SerializableSFSType {
 
-    private int suspectNumber = 0;
-    private String suspectName = null;
-    private String playerName = "";
-    private Card playerCard = null;
-    
-    private ArrayList<Card> cardsInHand = new ArrayList<Card>();
-    private ArrayList<Card> weapons = new ArrayList<Card>();
-    private ArrayList<Card> rooms = new ArrayList<Card>();
-    private ArrayList<Card> suspects = new ArrayList<Card>();
-    
-    private boolean computerPlayer = false;
-    private Location playerLocation = null;
-    private Notebook notebook = null;
-    private Color playerColor = Color.gray;
-    private boolean hasMadeFalseAccusation = false;
+	private int suspectNumber = 0;
+	private String suspectName = null;
+	private String playerName = "";
+	private Card playerCard = null;
 
-    public static final Color COLOR_SCARLET = Color.red;
-    public static final Color COLOR_GREEN = Color.green;
-    public static final Color COLOR_MUSTARD = Color.yellow;
-    public static final Color COLOR_PLUM = Color.magenta;
-    public static final Color COLOR_WHITE = Color.black;
-    public static final Color COLOR_PEACOCK = Color.blue;
+	private ArrayList<Card> cardsInHand = new ArrayList<>();
+	private ArrayList<Card> weapons = new ArrayList<>();
+	private ArrayList<Card> rooms = new ArrayList<>();
+	private ArrayList<Card> suspects = new ArrayList<>();
 
-    public Player() {
+	private boolean computerPlayer = false;
+	private Location playerLocation = null;
+	private Notebook notebook = null;
+	private Color playerColor = Color.gray;
+	private boolean hasMadeFalseAccusation = false;
 
-    }
+	public static final Color COLOR_SCARLET = Color.red;
+	public static final Color COLOR_GREEN = Color.green;
+	public static final Color COLOR_MUSTARD = Color.yellow;
+	public static final Color COLOR_PLUM = Color.magenta;
+	public static final Color COLOR_WHITE = Color.black;
+	public static final Color COLOR_PEACOCK = Color.blue;
 
-    public Player(Card pick, String name, Color color, boolean computer) {
-        setPlayerName(name);
-        setPlayerCard(pick);
-        setSuspectNumber(pick.getValue());
-        setSuspectName(getPlayerCard().toString());
-        setComputerPlayer(computer);
-        setPlayerColor(color);
-    }
+	public Player() {
 
-    public void setLocation(Location location) {
-        playerLocation = location;
-    }
+	}
 
-    public Location getLocation() {
-        return playerLocation;
-    }
+	public Player(final Card pick, final String name, final Color color, final boolean computer) {
+		this.setPlayerName(name);
+		this.setPlayerCard(pick);
+		this.setSuspectNumber(pick.getValue());
+		this.setSuspectName(this.getPlayerCard().toString());
+		this.setComputerPlayer(computer);
+		this.setPlayerColor(color);
+	}
 
-    public void setNotebook(Notebook notebook) {
-        this.notebook = notebook;
-    }
+	public void setLocation(final Location location) {
+		this.playerLocation = location;
+	}
 
-    public Notebook getNotebook() {
-        return notebook;
-    }
+	public Location getLocation() {
+		return this.playerLocation;
+	}
 
-    public void addCard(Card card) {
-        cardsInHand.add(card);
-        
-        switch(card.getType()) {
-        case Card.TYPE_ROOM:
-        	rooms.add(card);
-        	break;
-        case Card.TYPE_WEAPON:
-        	weapons.add(card);
-        	break;
-        case Card.TYPE_SUSPECT:
-        	suspects.add(card);
-        	break;
-        }
-    }
+	public void setNotebook(final Notebook notebook) {
+		this.notebook = notebook;
+	}
 
-    public ArrayList<Card> getCardsInHand() {
-        return cardsInHand;
-    }
-    
-    public List<Card> getRooms(){
-    	return this.rooms;
-    }
-    
-    public List<Card> getWeapons(){
-    	return this.rooms;
-    }
-    
-    public List<Card> getSuspects(){
-    	return this.rooms;
-    }
+	public Notebook getNotebook() {
+		return this.notebook;
+	}
 
-    public boolean isCardInHand(Card card) {
-        return cardsInHand.contains(card);
-    }
+	public void addCard(final Card card) {
+		this.cardsInHand.add(card);
 
-    public boolean isCardInHand(int type, int id) {
-        Card card = new Card(type, id);
-        return cardsInHand.contains(card);
-    }
+		switch(card.getType()) {
+		case Card.TYPE_ROOM:
+			this.rooms.add(card);
+			break;
+		case Card.TYPE_WEAPON:
+			this.weapons.add(card);
+			break;
+		case Card.TYPE_SUSPECT:
+			this.suspects.add(card);
+			break;
+		}
+	}
 
-    public boolean isHoldingCardInSuggestion(ArrayList<Card> suggestion) {
-        boolean hasCards = false;
-        for (Card card : cardsInHand) {
-            if (suggestion.contains(card)) {
-                hasCards = true;
-            }
-        }
-        return hasCards;
-    }
+	public ArrayList<Card> getCardsInHand() {
+		return this.cardsInHand;
+	}
 
-    public String toString() {
-        return getPlayerCard().toString();
-    }
+	public List<Card> getRooms(){
+		return this.rooms;
+	}
 
-    public String toLongString() {
-        String location = (playerLocation != null && playerLocation.getRoomId() != -1 ? "in the " + playerLocation.getRoomCard().toString() : "outside of a room");
-        return getPlayerCard().toString() + ", played by " + (isComputerPlayer() ? "computer" : getPlayerName()) + " is currently " + location + ".";
-    }
+	public List<Card> getWeapons(){
+		return this.rooms;
+	}
 
-    public String getSuspectName() {
-        return suspectName;
-    }
+	public List<Card> getSuspects(){
+		return this.rooms;
+	}
 
-    public void setSuspectName(String suspectName) {
-        this.suspectName = suspectName;
-    }
+	public boolean isCardInHand(final Card card) {
+		return this.cardsInHand.contains(card);
+	}
 
-    public Card getPlayerCard() {
-        return playerCard;
-    }
+	public boolean isCardInHand(final int type, final int id) {
+		final Card card = new Card(type, id);
+		return this.cardsInHand.contains(card);
+	}
 
-    public void setPlayerCard(Card playerCard) {
-        this.playerCard = playerCard;
-    }
+	public boolean isHoldingCardInSuggestion(final ArrayList<Card> suggestion) {
+		boolean hasCards = false;
+		for (final Card card : this.cardsInHand) {
+			if (suggestion.contains(card)) {
+				hasCards = true;
+			}
+		}
+		return hasCards;
+	}
 
-    public Color getPlayerColor() {
-        return playerColor;
-    }
+	@Override
+	public String toString() {
+		return this.getPlayerCard().toString();
+	}
 
-    public void setPlayerColor(Color playerColor) {
-        this.playerColor = playerColor;
-    }
+	public String toLongString() {
+		final String location = (this.playerLocation != null && this.playerLocation.getRoomId() != -1 ? "in the " + this.playerLocation.getRoomCard().toString() : "outside of a room");
+		return this.getPlayerCard().toString() + ", played by " + (this.isComputerPlayer() ? "computer" : this.getPlayerName()) + " is currently " + location + ".";
+	}
 
-    public String getPlayerName() {
-        return playerName;
-    }
+	public String getSuspectName() {
+		return this.suspectName;
+	}
 
-    public void setPlayerName(String playerName) {
-        this.playerName = playerName;
-    }
+	public void setSuspectName(final String suspectName) {
+		this.suspectName = suspectName;
+	}
 
-    public int getSuspectNumber() {
-        return suspectNumber;
-    }
+	public Card getPlayerCard() {
+		return this.playerCard;
+	}
 
-    public void setSuspectNumber(int suspectNumber) {
-        this.suspectNumber = suspectNumber;
-    }
+	public void setPlayerCard(final Card playerCard) {
+		this.playerCard = playerCard;
+	}
 
-    public boolean isComputerPlayer() {
-        return computerPlayer;
-    }
+	public Color getPlayerColor() {
+		return this.playerColor;
+	}
 
-    public void setComputerPlayer(boolean computerPlayer) {
-        this.computerPlayer = computerPlayer;
-    }
+	public void setPlayerColor(final Color playerColor) {
+		this.playerColor = playerColor;
+	}
 
-    public boolean hasMadeFalseAccusation() {
-        return hasMadeFalseAccusation;
-    }
+	public String getPlayerName() {
+		return this.playerName;
+	}
 
-    public void setHasMadeFalseAccusation() {
-        hasMadeFalseAccusation = true;
-    }
-    
-    public boolean isInARoom() {
-    	return this.playerLocation.getRoomId() != -1;
-    }
+	public void setPlayerName(final String playerName) {
+		this.playerName = playerName;
+	}
+
+	public int getSuspectNumber() {
+		return this.suspectNumber;
+	}
+
+	public void setSuspectNumber(final int suspectNumber) {
+		this.suspectNumber = suspectNumber;
+	}
+
+	public boolean isComputerPlayer() {
+		return this.computerPlayer;
+	}
+
+	public void setComputerPlayer(final boolean computerPlayer) {
+		this.computerPlayer = computerPlayer;
+	}
+
+	public boolean hasMadeFalseAccusation() {
+		return this.hasMadeFalseAccusation;
+	}
+
+	public void setHasMadeFalseAccusation() {
+		this.hasMadeFalseAccusation = true;
+	}
+
+	public boolean isInARoom() {
+		return this.playerLocation.getRoomId() != -1;
+	}
+
+	/*@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((cardsInHand == null) ? 0 : cardsInHand.hashCode());
+		result = prime * result + (computerPlayer ? 1231 : 1237);
+		result = prime * result + (hasMadeFalseAccusation ? 1231 : 1237);
+		result = prime * result + ((notebook == null) ? 0 : notebook.hashCode());
+		result = prime * result + ((playerCard == null) ? 0 : playerCard.hashCode());
+		result = prime * result + ((playerColor == null) ? 0 : playerColor.hashCode());
+		result = prime * result + ((playerLocation == null) ? 0 : playerLocation.hashCode());
+		result = prime * result + ((playerName == null) ? 0 : playerName.hashCode());
+		result = prime * result + ((rooms == null) ? 0 : rooms.hashCode());
+		result = prime * result + ((suspectName == null) ? 0 : suspectName.hashCode());
+		result = prime * result + suspectNumber;
+		result = prime * result + ((suspects == null) ? 0 : suspects.hashCode());
+		result = prime * result + ((weapons == null) ? 0 : weapons.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Player other = (Player) obj;
+
+		return this.suspectName.equals(other.suspectName);
+	}*/
 
 }

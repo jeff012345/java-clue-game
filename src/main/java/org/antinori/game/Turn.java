@@ -60,6 +60,7 @@ public class Turn {
             	if (accusation != null) {
             		if(ClueMain.clue.matchesVictimSet(accusation)) {
             			gameOver = true;
+            			ClueMain.clue.setWinner(player);
                         ResultLogger.logResult(player, accusation);
                         break;
             		} else {
