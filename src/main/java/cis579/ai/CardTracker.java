@@ -86,7 +86,7 @@ public class CardTracker {
 		}
 	}
 
-	public static double suggestionsMade() {
+	public static int suggestionsMade() {
 		return SUGGESTIONS_MADE;
 	}
 

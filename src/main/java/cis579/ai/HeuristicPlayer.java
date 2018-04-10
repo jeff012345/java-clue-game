@@ -240,40 +240,36 @@ public class HeuristicPlayer extends AiPlayer {
 		final double[] previousSignals = this.signals;
 		this.storeSignalValues(best);
 
-		if(previousSignals != null) {
-			Evaluator.updateQ(this.getPlayer(), previousSignals, this.signals);
-		}
+		Evaluator.updateQ(this.getPlayer(), previousSignals, this.signals);
 
 		return best;
 	}
 
 	private void storeSignalValues(final Card card) {
-		this.signals = this.calculateSignals(card);
+		final double[] newSignals = this.calculateSignals(card);
+		if(newSignals != null) {
+			this.signals = newSignals;
+		}
 	}
 
 	private double evaluateCard(final Card c) {
 		final double[] signals = this.calculateSignals(c);
-		return Evaluator.evaluate(signals);
-
-		//return this.coefficients[0] * signals[0] + this.coefficients[1] * signals[1]
-		//		+ this.coefficients[2] * signals[2];
+		return signals == null ? 0 : Evaluator.evaluate(signals);
 	}
 
 	private double[] calculateSignals(final Card card) {
+		if(CardTracker.suggestionsMade() == 0) {
+			return null;
+		}
+
 		final int timesGuessed = CardTracker.timesGuessed(card);
 		final double isNoShow = CardTracker.isNoShow(card) ? 1 : 0.5;
-		final double suggestionsMade = CardTracker.suggestionsMade() + 1;
-		final double averageTimesGuessed = CardTracker.averageTimesGuessed();
-
 		final int timesNotShown = this.guessedButNotShown.get(card).get();
 
-		final double sum = this.guessedButNotShown.values().stream().mapToInt(AtomicInteger::get).sum();
-		final double avgTimesNotShown = sum / this.guessedButNotShown.size();
-
 		return new double[] {
-				(timesGuessed - averageTimesGuessed) / suggestionsMade,
+				timesGuessed,
 				isNoShow,
-				(timesNotShown - avgTimesNotShown) / suggestionsMade
+				timesNotShown
 		};
 	}
 }
