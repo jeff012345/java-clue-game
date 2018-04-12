@@ -7,6 +7,7 @@ public class Evaluator {
 
 	private static final double ALPHA = 0.05;
 	private static final double GAMMA = 0.99;
+	private static final double LAMBDA = 1.0;
 
 	private static double[] THETA = new double[] { 0.2, 0.5, 0.2, 0.5 };
 
@@ -15,12 +16,16 @@ public class Evaluator {
 			return;
 
 		final double reward = reward(player);
-		//final double alpha = 1d / (ResultLogger.currentTurn() + 1);
-
-		THETA[0] = THETA[0] + (ALPHA * (reward + (GAMMA * THETA[0] * maxSignals[0]) - (THETA[0] * previousSignals[0])));
-		THETA[1] = THETA[1] + (ALPHA * (reward + (GAMMA * THETA[1] * maxSignals[1]) - (THETA[1] * previousSignals[1])));
-		THETA[2] = THETA[2] + (ALPHA * (reward + (GAMMA * THETA[2] * maxSignals[2]) - (THETA[2] * previousSignals[2])));
-		THETA[3] = THETA[3] + (ALPHA * (reward + (GAMMA * THETA[3]) - THETA[3]));
+		
+		double maxQ = evaluate(maxSignals);
+		double q = evaluate(previousSignals);
+		double z = ALPHA * (reward + (GAMMA * maxQ) - q);
+		double dt = z * q * (1 - q);
+		
+		THETA[0] = THETA[0] + dt * previousSignals[0];
+		THETA[1] = THETA[1] + dt * previousSignals[1];
+		THETA[2] = THETA[2] + dt * previousSignals[2];
+		THETA[3] = THETA[3] + dt;
 	}
 
 	public static double reward(final Player player) {
@@ -37,7 +42,7 @@ public class Evaluator {
 	}
 
 	public static double evaluate(final double[] signals) {
-		final double sum = (THETA[0] * signals[0]) + (THETA[1] * signals[1]) + (THETA[2] * signals[2]) + THETA[3];
+		final double sum = (THETA[0] * signals[0]) + (THETA[1] * signals[1]) + (THETA[2] * signals[2]) + LAMBDA * THETA[3];
 		return 1 / (1 + Math.exp(-1 * sum));
 	}
 
