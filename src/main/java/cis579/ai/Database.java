@@ -15,19 +15,23 @@ import cis579.ai.de.ResultDE;
 
 public class Database {
 
-	private static final String CONNECTION_STR = "jdbc:h2:tcp://localhost/~/results";
+	private static final boolean TCP = false;
+	private static final String CONNECTION_STR = "jdbc:h2:~/results";
 
 	private static Database database = null;
 
 	private Connection connection;
 
 	private Database() throws SQLException {
-		this.getConnection(0);
+		if(TCP)
+			this.getTcpConnection(0);
+		else
+			this.getEmbeddedConnection();
 
 		System.out.println("DB Opened");
 	}
 
-	private void getConnection(final int retry) {
+	private void getTcpConnection(final int retry) {
 		if(retry == 5) {
 			System.err.println("Could not obtain DB connection");
 			return;
@@ -44,10 +48,13 @@ public class Database {
 				return;
 			}
 
-			this.getConnection(retry + 1);
+			this.getTcpConnection(retry + 1);
 		}
 	}
 
+	private void getEmbeddedConnection() throws SQLException {
+		this.connection = DriverManager.getConnection(CONNECTION_STR + System.currentTimeMillis());
+	}
 
 	public static Database getInstance() {
 		if(database == null) {
@@ -68,7 +75,7 @@ public class Database {
 		this.connection.setAutoCommit(true);
 
 		final Statement s = this.connection.createStatement();
-		s.executeUpdate("CREATE TABLE IF NOT EXISTS TBL01_COEFFICIENT_LOG (id BIGINT auto_increment, a DOUBLE, b DOUBLE, c DOUBLE, d DOUBLE, success_rate DOUBLE, game_guid VARCHAR(100))");
+		s.executeUpdate("CREATE TABLE IF NOT EXISTS TBL01_COEFFICIENT_LOG (id BIGINT auto_increment, a DOUBLE, b DOUBLE, c DOUBLE, d DOUBLE, e DOUBLE, success_rate DOUBLE, game_guid VARCHAR(100))");
 		s.close();
 
 		System.out.println("DB initialized");
@@ -78,7 +85,9 @@ public class Database {
 		System.out.println("Closing DB");
 		try {
 			this.connection.close();
-			Server.shutdownTcpServer("tcp://localhost", "", true, false);
+			if(TCP) {
+				Server.shutdownTcpServer("tcp://localhost", "", true, false);
+			}
 		} catch (final SQLException e) {
 			e.printStackTrace();
 		}
@@ -90,13 +99,14 @@ public class Database {
 		try {
 			final double[] coeffs = result.getCoefficients();
 
-			final PreparedStatement s = this.connection.prepareStatement("INSERT INTO TBL01_COEFFICIENT_LOG (a, b, c, d, success_rate, game_guid) VALUES (?,?,?,?,?,?)");
+			final PreparedStatement s = this.connection.prepareStatement("INSERT INTO TBL01_COEFFICIENT_LOG (a, b, c, d, e, success_rate, game_guid) VALUES (?,?,?,?,?,?,?)");
 			s.setDouble(1, coeffs[0]);
 			s.setDouble(2, coeffs[1]);
 			s.setDouble(3, coeffs[2]);
 			s.setDouble(4, coeffs[3]);
-			s.setDouble(5, result.getSuccessRate());
-			s.setString(6, result.getGameGuid());
+			s.setDouble(5, coeffs[4]);
+			s.setDouble(6, result.getSuccessRate());
+			s.setString(7, result.getGameGuid());
 
 			final int cnt = s.executeUpdate();
 			if(cnt != 0) {
@@ -126,6 +136,7 @@ public class Database {
 						rs.getDouble("b"),
 						rs.getDouble("c"),
 						rs.getDouble("d"),
+						rs.getDouble("e")
 				};
 
 				result = new ResultDE();
