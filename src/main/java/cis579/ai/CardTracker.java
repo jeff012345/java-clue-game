@@ -74,15 +74,15 @@ public class CardTracker {
 
 	private static void getAllCards(){
 		for (int i = 0; i < Card.NUM_ROOMS; i++) {
-			ALL_CARDS.add(new Card(Card.TYPE_ROOM, i));
+			ALL_CARDS.add(Card.getInstance(Card.TYPE_ROOM, i));
 		}
 
 		for (int i = 0; i < Card.NUM_SUSPECTS; i++) {
-			ALL_CARDS.add( new Card(Card.TYPE_SUSPECT, i));
+			ALL_CARDS.add(Card.getInstance(Card.TYPE_SUSPECT, i));
 		}
 
 		for (int i = 0; i < Card.NUM_WEAPONS; i++) {
-			ALL_CARDS.add(new Card(Card.TYPE_WEAPON, i));
+			ALL_CARDS.add(Card.getInstance(Card.TYPE_WEAPON, i));
 		}
 	}
 

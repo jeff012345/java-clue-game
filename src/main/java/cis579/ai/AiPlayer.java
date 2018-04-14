@@ -83,21 +83,21 @@ public abstract class AiPlayer {
 		final Notebook notebook = this.player.getNotebook();
 
 		for (int i = 0; i < NUM_ROOMS; i++) {
-			final Card c = new Card(Card.TYPE_ROOM, i);
+			final Card c = Card.getInstance(Card.TYPE_ROOM, i);
 			if(!notebook.isCardToggled(c)) {
 				this.unknownRooms.add(c);
 			}
 		}
 
 		for (int i = 0; i < NUM_SUSPECTS; i++) {
-			final Card c = new Card(Card.TYPE_SUSPECT, i);
+			final Card c = Card.getInstance(Card.TYPE_SUSPECT, i);
 			if(!notebook.isCardToggled(c)) {
 				this.unknownSuspects.add(c);
 			}
 		}
 
 		for (int i = 0; i < NUM_WEAPONS; i++) {
-			final Card c = new Card(Card.TYPE_WEAPON, i);
+			final Card c = Card.getInstance(Card.TYPE_WEAPON, i);
 			if(!notebook.isCardToggled(c)) {
 				this.unknownWeapons.add(c);
 			}

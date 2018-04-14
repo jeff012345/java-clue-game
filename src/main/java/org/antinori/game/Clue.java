@@ -21,226 +21,226 @@ import cis579.ai.ResultLogger;
 
 public class Clue extends SFSObject {
 
-    private ArrayList<Player> players = new ArrayList<Player>(6);
+	private ArrayList<Player> players = new ArrayList<>(6);
 
-    private ArrayList<Card> shuffled = new ArrayList<Card>(TOTAL);
-    private ArrayList<Card> victimSet = new ArrayList<Card>(3);
-    
-    private Player winner = null;
+	private ArrayList<Card> shuffled = new ArrayList<>(TOTAL);
+	private ArrayList<Card> victimSet = new ArrayList<>(3);
 
-    private DealRequestHandler multiplayerDealer = null;
+	private Player winner = null;
 
-    public Clue() {
+	private DealRequestHandler multiplayerDealer = null;
 
-    }
+	public Clue() {
 
-    public void createDeck() {
+	}
 
-        ArrayList<Card> deck = new ArrayList<Card>(TOTAL);
+	public void createDeck() {
 
-        //create deck
-        for (int i = 0; i < NUM_ROOMS; i++) {
-            deck.add(new Card(TYPE_ROOM, i));
-        }
-        for (int i = 0; i < NUM_SUSPECTS; i++) {
-            deck.add(new Card(TYPE_SUSPECT, i));
-        }
-        for (int i = 0; i < NUM_WEAPONS; i++) {
-            deck.add(new Card(TYPE_WEAPON, i));
-        }
+		final ArrayList<Card> deck = new ArrayList<>(TOTAL);
 
-        // shuffle it
-        int w, r, s;
-        
-        if(ResultLogger.SHUFFLE_DECK) {
-	        Random rand = new Random(System.currentTimeMillis() % 389);
-	        
-	        for (int i = 0; i < TOTAL; i++) {
-	            int a = rand.nextInt(deck.size());
-	            Card c = deck.remove(a);
-	            shuffled.add(c);
-	        }
-	
-	        //pull the victim set
-	        w = rand.nextInt(NUM_WEAPONS);
-	        r = rand.nextInt(NUM_ROOMS);
-	        s = rand.nextInt(NUM_SUSPECTS);
-        } else {
-        	// 6 + 9 + 6 = 21 
-        	int[] order = { 2,20,18,19,17,8,1,7,12,14,9,15,16,0,13,6,5,10,11,3,4 }; 
-        	
-        	for(int i = 0; i < order.length; i++) {
-        		shuffled.add(deck.get(order[i]));
-        	}
-        	
-        	if(shuffled.size() != deck.size()) {
-        		throw new RuntimeException("you shuffled the deck wrong");
-        	}
-        	
-        	w = 1;
-        	r = 1;
-        	s = 1;
-        }
+		//create deck
+		for (int i = 0; i < NUM_ROOMS; i++) {
+			deck.add(Card.getInstance(TYPE_ROOM, i));
+		}
+		for (int i = 0; i < NUM_SUSPECTS; i++) {
+			deck.add(Card.getInstance(TYPE_SUSPECT, i));
+		}
+		for (int i = 0; i < NUM_WEAPONS; i++) {
+			deck.add(Card.getInstance(TYPE_WEAPON, i));
+		}
 
-        Card weapon = new Card(TYPE_WEAPON, w);
-        Card suspect = new Card(TYPE_SUSPECT, s);
-        Card room = new Card(TYPE_ROOM, r);
+		// shuffle it
+		int w, r, s;
 
-        shuffled.remove(weapon);
-        shuffled.remove(suspect);
-        shuffled.remove(room);
+		if(ResultLogger.SHUFFLE_DECK) {
+			final Random rand = new Random(System.currentTimeMillis() % 389);
 
-        victimSet.add(weapon);
-        victimSet.add(suspect);
-        victimSet.add(room);
+			for (int i = 0; i < TOTAL; i++) {
+				final int a = rand.nextInt(deck.size());
+				final Card c = deck.remove(a);
+				this.shuffled.add(c);
+			}
 
-    }
+			//pull the victim set
+			w = rand.nextInt(NUM_WEAPONS);
+			r = rand.nextInt(NUM_ROOMS);
+			s = rand.nextInt(NUM_SUSPECTS);
+		} else {
+			// 6 + 9 + 6 = 21
+			final int[] order = { 2,20,18,19,17,8,1,7,12,14,9,15,16,0,13,6,5,10,11,3,4 };
 
-    public Player addPlayer(Card p, String name, Color color, boolean computer) {
-        Player player = new Player(p, name, color, computer);
-        players.add(player);
-        return player;
-    }
+			for(int i = 0; i < order.length; i++) {
+				this.shuffled.add(deck.get(order[i]));
+			}
 
-    public int getCurrentPlayerCount() {
-        return players.size();
-    }
+			if(this.shuffled.size() != deck.size()) {
+				throw new RuntimeException("you shuffled the deck wrong");
+			}
 
-    public boolean containsSuspect(Card card) {
-        return players.contains(card);
-    }
+			w = 1;
+			r = 1;
+			s = 1;
+		}
 
-    public ArrayList<Player> getPlayers() {
-        return players;
-    }
+		final Card weapon = Card.getInstance(TYPE_WEAPON, w);
+		final Card suspect = Card.getInstance(TYPE_SUSPECT, s);
+		final Card room = Card.getInstance(TYPE_ROOM, r);
 
-    public Player getPlayer(int id) {
-        Player player = null;
-        for (Player p : players) {
-            if (p.getSuspectNumber() == id) {
-                player = p;
-            }
-        }
-        return player;
-    }
+		this.shuffled.remove(weapon);
+		this.shuffled.remove(suspect);
+		this.shuffled.remove(room);
 
-    public Player getPlayer(String name) {
-        Player player = null;
-        for (Player p : players) {
-            if (p.getPlayerName().equals(name)) {
-                player = p;
-            }
-        }
-        return player;
-    }
+		this.victimSet.add(weapon);
+		this.victimSet.add(suspect);
+		this.victimSet.add(room);
 
-    public void setMultiplayerHandler(DealRequestHandler multiplayerDealer) {
-        this.multiplayerDealer = multiplayerDealer;
-    }
+	}
 
-    public String dealShuffledDeck() throws Exception {
+	public Player addPlayer(final Card p, final String name, final Color color, final boolean computer) {
+		final Player player = new Player(p, name, color, computer);
+		this.players.add(player);
+		return player;
+	}
 
-        if (shuffled == null || shuffled.isEmpty()) {
-            throw new RuntimeException("Shuffled Deck is null.");
-        }
+	public int getCurrentPlayerCount() {
+		return this.players.size();
+	}
 
-        if (players == null || players.isEmpty()) {
-            throw new RuntimeException("Players is null.");
-        }
+	public boolean containsSuspect(final Card card) {
+		return this.players.contains(card);
+	}
 
-        //deal the cards
-        int player_index = 0;
-        for (int i = 0; i < shuffled.size(); i++) {
-            Card card = shuffled.get(i);
-            if (player_index == players.size()) {
-                player_index = 0;
-            }
-            Player player = players.get(player_index);
+	public ArrayList<Player> getPlayers() {
+		return this.players;
+	}
 
-            player.addCard(card);
+	public Player getPlayer(final int id) {
+		Player player = null;
+		for (final Player p : this.players) {
+			if (p.getSuspectNumber() == id) {
+				player = p;
+			}
+		}
+		return player;
+	}
 
-            if (multiplayerDealer != null) {
-                multiplayerDealer.dealCard(card, player);
-            }
+	public Player getPlayer(final String name) {
+		Player player = null;
+		for (final Player p : this.players) {
+			if (p.getPlayerName().equals(name)) {
+				player = p;
+			}
+		}
+		return player;
+	}
 
-            player_index++;
-        }
+	public void setMultiplayerHandler(final DealRequestHandler multiplayerDealer) {
+		this.multiplayerDealer = multiplayerDealer;
+	}
 
-        String msg = "Cards have been dealt, and the players are:\n";
-        for (int j = 0; j < players.size(); j++) {
-            msg += players.get(j).toLongString() + "\n";
-        }
+	public String dealShuffledDeck() throws Exception {
 
-        if (multiplayerDealer != null) {
-            multiplayerDealer.getSet(players.get(0));
-            multiplayerDealer.startTurn(players.get(0));
-        }
+		if (this.shuffled == null || this.shuffled.isEmpty()) {
+			throw new RuntimeException("Shuffled Deck is null.");
+		}
 
-        return msg;
-    }
+		if (this.players == null || this.players.isEmpty()) {
+			throw new RuntimeException("Players is null.");
+		}
 
-    public String getAdjacentPlayerName(String name) {
-        String adjPlayerName = null;
-        for (int i = 0; i < players.size(); i++) {
-            Player p = players.get(i);
-            if (p.getPlayerName().equals(name)) {
-                int next = i + 1;
-                if (next == players.size()) {
-                    next = 0;
-                }
-                adjPlayerName = players.get(next).getPlayerName();
-                break;
-            }
-        }
-        return adjPlayerName;
-    }
+		//deal the cards
+		int player_index = 0;
+		for (int i = 0; i < this.shuffled.size(); i++) {
+			final Card card = this.shuffled.get(i);
+			if (player_index == this.players.size()) {
+				player_index = 0;
+			}
+			final Player player = this.players.get(player_index);
 
-    public List<Card> getShuffledDeck() {
-        return shuffled;
-    }
+			player.addCard(card);
 
-    public boolean matchesVictimSet(ArrayList<Card> accusation) {
-        Card weapon = null, suspect = null, room = null;
-        for (Card card : accusation) {
-            if (card.getType() == TYPE_WEAPON) {
-                weapon = card;
-            }
-            if (card.getType() == TYPE_ROOM) {
-                room = card;
-            }
-            if (card.getType() == TYPE_SUSPECT) {
-                suspect = card;
-            }
-        }
-        return matchesVictimSet(weapon, suspect, room);
-    }
+			if (this.multiplayerDealer != null) {
+				this.multiplayerDealer.dealCard(card, player);
+			}
 
-    public boolean matchesVictimSet(Card weapon, Card suspect, Card room) {
-        if (victimSet.contains(weapon) && victimSet.contains(suspect) && victimSet.contains(room)) {
-            return true;
-        }
-        return false;
-    }
+			player_index++;
+		}
 
-    public boolean matchesVictimSet(int w, int s, int r) {
-        Card suspect = new Card(TYPE_SUSPECT, s);
-        Card weapon = new Card(TYPE_WEAPON, w);
-        Card room = new Card(TYPE_ROOM, r);
-        if (victimSet.contains(weapon) && victimSet.contains(suspect) && victimSet.contains(room)) {
-            return true;
-        }
-        return false;
-    }
-    
-    public ArrayList<Card> getVictimSet(){
-    	return this.victimSet;
-    }
-    
-    public Player getWinner() {
-    	return this.winner;
-    }
-    
-    public void setWinner(Player player) {
-    	this.winner = player;
-    }
+		String msg = "Cards have been dealt, and the players are:\n";
+		for (int j = 0; j < this.players.size(); j++) {
+			msg += this.players.get(j).toLongString() + "\n";
+		}
+
+		if (this.multiplayerDealer != null) {
+			this.multiplayerDealer.getSet(this.players.get(0));
+			this.multiplayerDealer.startTurn(this.players.get(0));
+		}
+
+		return msg;
+	}
+
+	public String getAdjacentPlayerName(final String name) {
+		String adjPlayerName = null;
+		for (int i = 0; i < this.players.size(); i++) {
+			final Player p = this.players.get(i);
+			if (p.getPlayerName().equals(name)) {
+				int next = i + 1;
+				if (next == this.players.size()) {
+					next = 0;
+				}
+				adjPlayerName = this.players.get(next).getPlayerName();
+				break;
+			}
+		}
+		return adjPlayerName;
+	}
+
+	public List<Card> getShuffledDeck() {
+		return this.shuffled;
+	}
+
+	public boolean matchesVictimSet(final ArrayList<Card> accusation) {
+		Card weapon = null, suspect = null, room = null;
+		for (final Card card : accusation) {
+			if (card.getType() == TYPE_WEAPON) {
+				weapon = card;
+			}
+			if (card.getType() == TYPE_ROOM) {
+				room = card;
+			}
+			if (card.getType() == TYPE_SUSPECT) {
+				suspect = card;
+			}
+		}
+		return this.matchesVictimSet(weapon, suspect, room);
+	}
+
+	public boolean matchesVictimSet(final Card weapon, final Card suspect, final Card room) {
+		if (this.victimSet.contains(weapon) && this.victimSet.contains(suspect) && this.victimSet.contains(room)) {
+			return true;
+		}
+		return false;
+	}
+
+	public boolean matchesVictimSet(final int w, final int s, final int r) {
+		final Card suspect = Card.getInstance(TYPE_SUSPECT, s);
+		final Card weapon = Card.getInstance(TYPE_WEAPON, w);
+		final Card room = Card.getInstance(TYPE_ROOM, r);
+		if (this.victimSet.contains(weapon) && this.victimSet.contains(suspect) && this.victimSet.contains(room)) {
+			return true;
+		}
+		return false;
+	}
+
+	public ArrayList<Card> getVictimSet(){
+		return this.victimSet;
+	}
+
+	public Player getWinner() {
+		return this.winner;
+	}
+
+	public void setWinner(final Player player) {
+		this.winner = player;
+	}
 }

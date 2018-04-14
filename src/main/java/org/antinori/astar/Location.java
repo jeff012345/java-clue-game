@@ -10,166 +10,169 @@ import org.antinori.game.Card;
 public class Location implements Node<Location>, Serializable {
 
 	private static final long serialVersionUID = -6775415845109915655L;
-	
+
 	private final int x;
-    private final int y;
-    private int height;
-    private boolean blocked;
-    private boolean highlight;
-    private boolean isRoom;
-    private int roomId = -1;
-    private Color color = Color.gray;
-    
-    private long visited;
+	private final int y;
+	private int height;
+	private boolean blocked;
+	private boolean highlight;
+	private boolean isRoom;
+	private int roomId = -1;
+	private Color color = Color.gray;
 
-    private transient List<Location> neighbors;
-    
-    private ArrayList<Location> realNeighbors = null;
+	private long visited;
 
-    public Location(int x, int y) {
-        this.x = x;
-        this.y = y;
-        neighbors = new ArrayList<Location>();
-    }
+	private transient List<Location> neighbors;
 
-    public Location(int x, int y, Color color) {
-        this.x = x;
-        this.y = y;
-        this.color = color;
-        neighbors = new ArrayList<Location>();
-    }
+	private ArrayList<Location> realNeighbors = null;
 
-    public int getX() {
-        return x;
-    }
+	public Location(final int x, final int y) {
+		this.x = x;
+		this.y = y;
+		this.neighbors = new ArrayList<>();
+	}
 
-    public int getY() {
-        return y;
-    }
+	public Location(final int x, final int y, final Color color) {
+		this.x = x;
+		this.y = y;
+		this.color = color;
+		this.neighbors = new ArrayList<>();
+	}
 
-    @Override
-    public int hashCode() {
-        return x * y;
-    }
+	public int getX() {
+		return this.x;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof Location) {
-            Location loc = (Location) obj;
-            return (loc.getX() == this.x && loc.getY() == this.y);
-        } else {
-            return false;
-        }
-    }
+	public int getY() {
+		return this.y;
+	}
 
-    public void setBlocked(boolean blocked) {
-        this.blocked = blocked;
-    }
+	@Override
+	public int hashCode() {
+		return this.x * this.y;
+	}
 
-    public boolean getBlocked() {
-        return blocked;
-    }
+	@Override
+	public boolean equals(final Object obj) {
+		if (obj instanceof Location) {
+			final Location loc = (Location) obj;
+			return (loc.getX() == this.x && loc.getY() == this.y);
+		} else {
+			return false;
+		}
+	}
 
-    public void setHighlighted(boolean highlight) {
-        this.highlight = highlight;
-    }
+	public void setBlocked(final boolean blocked) {
+		this.blocked = blocked;
+	}
 
-    public boolean getHighlighted() {
-        return highlight;
-    }
+	public boolean getBlocked() {
+		return this.blocked;
+	}
 
-    public void setIsRoom(boolean isRoom) {
-        this.isRoom = isRoom;
-    }
+	public void setHighlighted(final boolean highlight) {
+		this.highlight = highlight;
+	}
 
-    public boolean isRoom() {
-        return isRoom;
-    }
-    
-    public void setRoomId(int id) {
-        this.roomId = id;
-    }
+	public boolean getHighlighted() {
+		return this.highlight;
+	}
 
-    public int getRoomId() {
-        return roomId;
-    }
+	public void setIsRoom(final boolean isRoom) {
+		this.isRoom = isRoom;
+	}
 
-    public Card getRoomCard() {
-        return (roomId != -1 ? new Card(Card.TYPE_ROOM, roomId) : null);
-    }
+	public boolean isRoom() {
+		return this.isRoom;
+	}
 
-    public Color getColor() {
-        return color;
-    }
+	public void setRoomId(final int id) {
+		this.roomId = id;
+	}
 
-    public void setColor(Color color) {
-        this.color = color;
-    }
+	public int getRoomId() {
+		return this.roomId;
+	}
 
-    public int getHeight() {
-        return height;
-    }
+	public Card getRoomCard() {
+		return (this.roomId != -1 ? Card.getInstance(Card.TYPE_ROOM, this.roomId) : null);
+	}
 
-    public void setHeight(int height) {
-        this.height = height;
-    }
+	public Color getColor() {
+		return this.color;
+	}
 
-    public double getDistance(Location dest) {
-        double a = dest.x - x;
-        double b = dest.y - y;
-        return Math.sqrt(a * a + b * b);
-    }
+	public void setColor(final Color color) {
+		this.color = color;
+	}
 
-    public double pathCostEstimate(Location goal) {
-        return getDistance(goal) * 0.99;
-    }
+	public int getHeight() {
+		return this.height;
+	}
 
-    public double traverseCost(Location target) {
-        double distance = getDistance(target);
-        double diff = target.getHeight() - getHeight();
-        return Math.abs(diff) + distance;
-    }
+	public void setHeight(final int height) {
+		this.height = height;
+	}
 
-    /**
-     * @return returns neighbors that are not blocked
-     */
-    public Iterable<Location> neighbors() {
-    	if(this.realNeighbors != null) {
-    		return this.realNeighbors;
-    	}
-    	
-        this.realNeighbors = new ArrayList<Location>();
-        if (!blocked) {
-            for (Location loc : neighbors) {
-                if (!loc.blocked) {
-                    realNeighbors.add(loc);
-                }
-            }
-        }
+	public double getDistance(final Location dest) {
+		final double a = dest.x - this.x;
+		final double b = dest.y - this.y;
+		return Math.sqrt(a * a + b * b);
+	}
 
-        return this.realNeighbors;
-    }
+	@Override
+	public double pathCostEstimate(final Location goal) {
+		return this.getDistance(goal) * 0.99;
+	}
 
-    public void addNeighbor(Location l) {
-        neighbors.add(l);
-    }
+	@Override
+	public double traverseCost(final Location target) {
+		final double distance = this.getDistance(target);
+		final double diff = target.getHeight() - this.getHeight();
+		return Math.abs(diff) + distance;
+	}
 
-    public void removeNeighbor(Location l) {
-        neighbors.remove(l);
-    }
+	/**
+	 * @return returns neighbors that are not blocked
+	 */
+	 @Override
+	 public Iterable<Location> neighbors() {
+		if(this.realNeighbors != null) {
+			return this.realNeighbors;
+		}
 
-    @Override
-    public String toString() {
-        return "Location [" + x + "][" + y + "]; Room = " + (isRoom ? getRoomCard().toString() : roomId);
-    }
+		this.realNeighbors = new ArrayList<>();
+		if (!this.blocked) {
+			for (final Location loc : this.neighbors) {
+				if (!loc.blocked) {
+					this.realNeighbors.add(loc);
+				}
+			}
+		}
 
-    public boolean visit(long vistorId) {
-    	if(vistorId == this.visited) {
-    		return true;
-    	}
-    	
-    	this.visited = vistorId;
-    	return false;
-    }
-    
+		return this.realNeighbors;
+	 }
+
+	 public void addNeighbor(final Location l) {
+		 this.neighbors.add(l);
+	 }
+
+	 public void removeNeighbor(final Location l) {
+		 this.neighbors.remove(l);
+	 }
+
+	 @Override
+	 public String toString() {
+		 return "Location [" + this.x + "][" + this.y + "]; Room = " + (this.isRoom ? this.getRoomCard().toString() : this.roomId);
+	 }
+
+	 public boolean visit(final long vistorId) {
+		 if(vistorId == this.visited) {
+			 return true;
+		 }
+
+		 this.visited = vistorId;
+		 return false;
+	 }
+
 }

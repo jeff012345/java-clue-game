@@ -21,226 +21,228 @@ import cis579.ai.Solution;
 
 public class Notebook implements SerializableSFSType {
 
-    private Player player;
-    private LinkedHashMap<Card, Entry> entries = new LinkedHashMap<Card, Entry>();
-    
-    public Notebook(Player player) {
-        this.setPlayer(player);
+	private Player player;
+	private LinkedHashMap<Card, Entry> entries = new LinkedHashMap<>();
 
-        ArrayList<Card> deck = new ArrayList<Card>(TOTAL);
-        for (int i = 0; i < NUM_SUSPECTS; i++) {
-            deck.add(new Card(TYPE_SUSPECT, i));
-        }
-        for (int i = 0; i < NUM_WEAPONS; i++) {
-            deck.add(new Card(TYPE_WEAPON, i));
-        }
-        for (int i = 0; i < NUM_ROOMS; i++) {
-            deck.add(new Card(TYPE_ROOM, i));
-        }
+	public Notebook(final Player player) {
+		this.setPlayer(player);
 
-        for (Card card : deck) {
-            entries.put(card, new Entry(card));
-        }
+		final ArrayList<Card> deck = new ArrayList<>(TOTAL);
+		for (int i = 0; i < NUM_SUSPECTS; i++) {
+			deck.add(Card.getInstance(TYPE_SUSPECT, i));
+		}
+		for (int i = 0; i < NUM_WEAPONS; i++) {
+			deck.add(Card.getInstance(TYPE_WEAPON, i));
+		}
+		for (int i = 0; i < NUM_ROOMS; i++) {
+			deck.add(Card.getInstance(TYPE_ROOM, i));
+		}
 
-        //set cards in hand
-        for (Card card : player.getCardsInHand()) {
-            Entry entry = entries.get(card);
-            entry.setInHand(true);
-        }
-    }
-    
-    public void setToggled(Card card) {
-        Entry entry = entries.get(card);
-        entry.setToggled(!entry.getToggled());
-    }
+		for (final Card card : deck) {
+			this.entries.put(card, new Entry(card));
+		}
 
-    public boolean isCardInHand(Card card) {
-        Entry entry = entries.get(card);
-        return entry.inHand();
-    }
+		//set cards in hand
+		for (final Card card : player.getCardsInHand()) {
+			final Entry entry = this.entries.get(card);
+			entry.setInHand(true);
+		}
+	}
 
-    public boolean isCardToggled(Card card) {
-        Entry entry = entries.get(card);
-        return entry.getToggled();
-    }
+	public void setToggled(final Card card) {
+		final Entry entry = this.entries.get(card);
+		entry.setToggled(!entry.getToggled());
+	}
 
-    public boolean isLocationCardInHandOrToggled(Location location) {
-        Card roomCard = location.getRoomCard();
-        return isLocationCardInHandOrToggled(roomCard);
-    }
+	public boolean isCardInHand(final Card card) {
+		final Entry entry = this.entries.get(card);
+		return entry.inHand();
+	}
 
-    public boolean isLocationCardInHandOrToggled(Card card) {
-        if (isCardInHand(card) || isCardToggled(card)) {
-            return true;
-        }
-        return false;
-    }
+	public boolean isCardToggled(final Card card) {
+		final Entry entry = this.entries.get(card);
+		return entry.getToggled();
+	}
 
-    public String toString() {
-        String text = getPlayer().toString() + "'s Notebook :";
-        for (Entry entry : entries.values()) {
-            text += entry.toString();
-        }
-        return text;
-    }
+	public boolean isLocationCardInHandOrToggled(final Location location) {
+		final Card roomCard = location.getRoomCard();
+		return this.isLocationCardInHandOrToggled(roomCard);
+	}
 
-    public ArrayList<Card> canMakeAccusation() {
-    	
-    	ArrayList<Card> accusation = new ArrayList<Card>();
-    	
-    	// check if AI player can make an accusation
-    	if(player.isComputerPlayer()) {
-    		Solution s = AiPlayerManager.canMakeAccusation(player);
-    		if(s == null) {
-    			return null;
-    		}
-    		
-    		accusation.add(s.suspect);
-    		accusation.add(s.room);
-    		accusation.add(s.weapon);
-    		
-    		return accusation;
-    	}
+	public boolean isLocationCardInHandOrToggled(final Card card) {
+		if (this.isCardInHand(card) || this.isCardToggled(card)) {
+			return true;
+		}
+		return false;
+	}
 
-        int count = 0;
-        for (int i = 0; i < NUM_SUSPECTS; i++) {
-            Card card = new Card(TYPE_SUSPECT, i);
-            if (!isCardInHand(card) && !isCardToggled(card)) {
-                count++;
-            }
-        }
+	@Override
+	public String toString() {
+		String text = this.getPlayer().toString() + "'s Notebook :";
+		for (final Entry entry : this.entries.values()) {
+			text += entry.toString();
+		}
+		return text;
+	}
 
-        if (count == 1) {
-            for (int i = 0; i < NUM_SUSPECTS; i++) {
-                Card card = new Card(TYPE_SUSPECT, i);
-                if (!isCardInHand(card) && !isCardToggled(card)) {
-                    accusation.add(card);
-                }
-            }
-        }
+	public ArrayList<Card> canMakeAccusation() {
 
-        count = 0;
-        for (int i = 0; i < NUM_WEAPONS; i++) {
-            Card card = new Card(TYPE_WEAPON, i);
-            if (!isCardInHand(card) && !isCardToggled(card)) {
-                count++;
-            }
-        }
+		ArrayList<Card> accusation = new ArrayList<>();
 
-        if (count == 1) {
-            for (int i = 0; i < NUM_WEAPONS; i++) {
-                Card card = new Card(TYPE_WEAPON, i);
-                if (!isCardInHand(card) && !isCardToggled(card)) {
-                    accusation.add(card);
-                }
-            }
-        }
+		// check if AI player can make an accusation
+		if(this.player.isComputerPlayer()) {
+			final Solution s = AiPlayerManager.canMakeAccusation(this.player);
+			if(s == null) {
+				return null;
+			}
 
-        count = 0;
-        for (int i = 0; i < NUM_ROOMS; i++) {
-            Card card = new Card(TYPE_ROOM, i);
-            if (!isCardInHand(card) && !isCardToggled(card)) {
-                count++;
-            }
-        }
+			accusation.add(s.suspect);
+			accusation.add(s.room);
+			accusation.add(s.weapon);
 
-        if (count == 1) {
-            for (int i = 0; i < NUM_ROOMS; i++) {
-                Card card = new Card(TYPE_ROOM, i);
-                if (!isCardInHand(card) && !isCardToggled(card)) {
-                    accusation.add(card);
-                }
-            }
-        }
+			return accusation;
+		}
 
-        if (accusation.size() != 3) {
-            accusation = null;
-        }
+		int count = 0;
+		for (int i = 0; i < NUM_SUSPECTS; i++) {
+			final Card card = Card.getInstance(TYPE_SUSPECT, i);
+			if (!this.isCardInHand(card) && !this.isCardToggled(card)) {
+				count++;
+			}
+		}
 
-        return accusation;
-    }
+		if (count == 1) {
+			for (int i = 0; i < NUM_SUSPECTS; i++) {
+				final Card card = Card.getInstance(TYPE_SUSPECT, i);
+				if (!this.isCardInHand(card) && !this.isCardToggled(card)) {
+					accusation.add(card);
+				}
+			}
+		}
 
-    public Card randomlyPickCardOfType(int type) {
+		count = 0;
+		for (int i = 0; i < NUM_WEAPONS; i++) {
+			final Card card = Card.getInstance(TYPE_WEAPON, i);
+			if (!this.isCardInHand(card) && !this.isCardToggled(card)) {
+				count++;
+			}
+		}
 
-        //select a card of indicated type and check the cards in your hand
-        Card picked_card = null;
-        ArrayList<Card> picks = new ArrayList<Card>();
+		if (count == 1) {
+			for (int i = 0; i < NUM_WEAPONS; i++) {
+				final Card card = Card.getInstance(TYPE_WEAPON, i);
+				if (!this.isCardInHand(card) && !this.isCardToggled(card)) {
+					accusation.add(card);
+				}
+			}
+		}
 
-        int total = 0;
-        if (type == TYPE_SUSPECT) {
-            total = NUM_SUSPECTS;
-        }
-        if (type == TYPE_ROOM) {
-            total = NUM_ROOMS;
-        }
-        if (type == TYPE_WEAPON) {
-            total = NUM_WEAPONS;
-        }
+		count = 0;
+		for (int i = 0; i < NUM_ROOMS; i++) {
+			final Card card = Card.getInstance(TYPE_ROOM, i);
+			if (!this.isCardInHand(card) && !this.isCardToggled(card)) {
+				count++;
+			}
+		}
 
-        for (int i = 0; i < total; i++) {
-            Card card = new Card(type, i);
-            if (isCardInHand(card) || isCardToggled(card)) {
-                continue;
-            }
-            picks.add(card);
-        }
+		if (count == 1) {
+			for (int i = 0; i < NUM_ROOMS; i++) {
+				final Card card = Card.getInstance(TYPE_ROOM, i);
+				if (!this.isCardInHand(card) && !this.isCardToggled(card)) {
+					accusation.add(card);
+				}
+			}
+		}
 
-        if (picks.size() > 1) {
-            int r = new Random().nextInt(picks.size());
-            picked_card = picks.get(r);
-        } else if (picks.size() == 1) {
-            picked_card = picks.get(0);
-        } else {
-            //just return a random card of this type
-            int r = new Random().nextInt(total);
-            picked_card = new Card(type, r);
-        }
+		if (accusation.size() != 3) {
+			accusation = null;
+		}
 
-        return picked_card;
-    }
+		return accusation;
+	}
 
-    public Player getPlayer() {
-        return player;
-    }
+	public Card randomlyPickCardOfType(final int type) {
 
-    public void setPlayer(Player player) {
-        this.player = player;
-    }
+		//select a card of indicated type and check the cards in your hand
+		Card picked_card = null;
+		final ArrayList<Card> picks = new ArrayList<>();
 
-    public static class Entry implements SerializableSFSType {
+		int total = 0;
+		if (type == TYPE_SUSPECT) {
+			total = NUM_SUSPECTS;
+		}
+		if (type == TYPE_ROOM) {
+			total = NUM_ROOMS;
+		}
+		if (type == TYPE_WEAPON) {
+			total = NUM_WEAPONS;
+		}
 
-        Card value;
-        boolean inHand = false;
-        boolean toggled = false;
+		for (int i = 0; i < total; i++) {
+			final Card card = Card.getInstance(type, i);
+			if (this.isCardInHand(card) || this.isCardToggled(card)) {
+				continue;
+			}
+			picks.add(card);
+		}
 
-        Entry(Card value) {
-            this.value = value;
-        }
+		if (picks.size() > 1) {
+			final int r = new Random().nextInt(picks.size());
+			picked_card = picks.get(r);
+		} else if (picks.size() == 1) {
+			picked_card = picks.get(0);
+		} else {
+			//just return a random card of this type
+			final int r = new Random().nextInt(total);
+			picked_card = Card.getInstance(type, r);
+		}
 
-        boolean inHand() {
-            return inHand;
-        }
+		return picked_card;
+	}
 
-        void setInHand(boolean inHand) {
-            this.inHand = inHand;
-        }
+	public Player getPlayer() {
+		return this.player;
+	}
 
-        boolean getToggled() {
-            return toggled;
-        }
+	public void setPlayer(final Player player) {
+		this.player = player;
+	}
 
-        void setToggled(boolean toggled) {
-            this.toggled = toggled;
-        }
+	public static class Entry implements SerializableSFSType {
 
-        String getValue() {
-            return value.toString();
-        }
+		Card value;
+		boolean inHand = false;
+		boolean toggled = false;
 
-        public String toString() {
-            return "[" + value.toString() + " inHand:" + inHand + " toggled:" + toggled + "] ";
-        }
+		Entry(final Card value) {
+			this.value = value;
+		}
 
-    }
+		boolean inHand() {
+			return this.inHand;
+		}
+
+		void setInHand(final boolean inHand) {
+			this.inHand = inHand;
+		}
+
+		boolean getToggled() {
+			return this.toggled;
+		}
+
+		void setToggled(final boolean toggled) {
+			this.toggled = toggled;
+		}
+
+		String getValue() {
+			return this.value.toString();
+		}
+
+		@Override
+		public String toString() {
+			return "[" + this.value.toString() + " inHand:" + this.inHand + " toggled:" + this.toggled + "] ";
+		}
+
+	}
 
 }

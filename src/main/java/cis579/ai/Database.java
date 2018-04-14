@@ -68,7 +68,7 @@ public class Database {
 		this.connection.setAutoCommit(true);
 
 		final Statement s = this.connection.createStatement();
-		s.executeUpdate("CREATE TABLE IF NOT EXISTS TBL01_COEFFICIENT_LOG (id BIGINT auto_increment, a DOUBLE, b DOUBLE, c DOUBLE, success_rate DOUBLE, game_guid VARCHAR(100))");
+		s.executeUpdate("CREATE TABLE IF NOT EXISTS TBL01_COEFFICIENT_LOG (id BIGINT auto_increment, a DOUBLE, b DOUBLE, c DOUBLE, d DOUBLE, success_rate DOUBLE, game_guid VARCHAR(100))");
 		s.close();
 
 		System.out.println("DB initialized");
@@ -90,12 +90,13 @@ public class Database {
 		try {
 			final double[] coeffs = result.getCoefficients();
 
-			final PreparedStatement s = this.connection.prepareStatement("INSERT INTO TBL01_COEFFICIENT_LOG (a, b, c, success_rate, game_guid) VALUES (?,?,?,?,?)");
+			final PreparedStatement s = this.connection.prepareStatement("INSERT INTO TBL01_COEFFICIENT_LOG (a, b, c, d, success_rate, game_guid) VALUES (?,?,?,?,?,?)");
 			s.setDouble(1, coeffs[0]);
 			s.setDouble(2, coeffs[1]);
 			s.setDouble(3, coeffs[2]);
-			s.setDouble(4, result.getSuccessRate());
-			s.setString(5, result.getGameGuid());
+			s.setDouble(4, coeffs[3]);
+			s.setDouble(5, result.getSuccessRate());
+			s.setString(6, result.getGameGuid());
 
 			final int cnt = s.executeUpdate();
 			if(cnt != 0) {
@@ -123,7 +124,8 @@ public class Database {
 				coeffs = new double[] {
 						rs.getDouble("a"),
 						rs.getDouble("b"),
-						rs.getDouble("c")
+						rs.getDouble("c"),
+						rs.getDouble("d"),
 				};
 
 				result = new ResultDE();

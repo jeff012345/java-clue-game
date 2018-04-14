@@ -7,15 +7,11 @@ import static org.antinori.game.Card.TYPE_ROOM;
 import static org.antinori.game.Card.TYPE_SUSPECT;
 import static org.antinori.game.Card.TYPE_WEAPON;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.antinori.astar.Location;
@@ -24,34 +20,34 @@ import org.antinori.game.Player;
 
 public class HeuristicPlayer extends AiPlayer {
 
-	private static final Map<String, List<Double>> coefficientStore = new HashMap<>();
+	//private static final Map<String, List<Double>> coefficientStore = new HashMap<>();
 
 	private static final Set<Card> DECK = new TreeSet<>();
 
 	static {
-		coefficientStore.put(Card.SCARLET_NAME, new ArrayList<Double>(3));
+		/*coefficientStore.put(Card.SCARLET_NAME, new ArrayList<Double>(3));
 		coefficientStore.put(Card.WHITE_NAME, new ArrayList<Double>(3));
 		coefficientStore.put(Card.PLUM_NAME, new ArrayList<Double>(3));
 		coefficientStore.put(Card.MUSTARD_NAME, new ArrayList<Double>(3));
 		coefficientStore.put(Card.PEACOCK_NAME, new ArrayList<Double>(3));
-		coefficientStore.put(Card.GREEN_NAME, new ArrayList<Double>(3));
+		coefficientStore.put(Card.GREEN_NAME, new ArrayList<Double>(3));*/
 
 		// make deck of cards
 		for (int i = 0; i < NUM_ROOMS; i++) {
-			DECK.add(new Card(TYPE_ROOM, i));
+			DECK.add(Card.getInstance(TYPE_ROOM, i));
 		}
 		for (int i = 0; i < NUM_SUSPECTS; i++) {
-			DECK.add(new Card(TYPE_SUSPECT, i));
+			DECK.add(Card.getInstance(TYPE_SUSPECT, i));
 		}
 		for (int i = 0; i < NUM_WEAPONS; i++) {
-			DECK.add(new Card(TYPE_WEAPON, i));
+			DECK.add(Card.getInstance(TYPE_WEAPON, i));
 		}
 	}
 
 	public static void resetCoefficients() {
-		for(final List<Double> coeffs : coefficientStore.values()) {
+		/*for(final List<Double> coeffs : coefficientStore.values()) {
 			coeffs.clear();
-		}
+		}*/
 	}
 
 	// =======================================================================================================================================
@@ -61,18 +57,21 @@ public class HeuristicPlayer extends AiPlayer {
 	private double[] coefficients = new double[3];
 	private double[] signals = null;
 
-	private HashMap<Card, AtomicInteger> guessedButNotShown = new HashMap<>();
+	private HashMap<Card, AtomicInteger> guessedButNotShown;
 
 	public HeuristicPlayer(final Player player) {
 		super(player);
+
+		this.guessedButNotShown = new HashMap<>();
 
 		DECK.stream().forEach(card -> {
 			this.guessedButNotShown.put(card, new AtomicInteger(0));
 		});
 
-		this.determineCoefficients();
+		//this.determineCoefficients();
 	}
 
+	/*
 	private void determineCoefficients() {
 		final List<Double> coeffs = coefficientStore.get(this.player.getSuspectName());
 		if(coeffs.isEmpty()) {
@@ -101,6 +100,7 @@ public class HeuristicPlayer extends AiPlayer {
 
 		//System.out.println(this.player.getSuspectName() + "; a = " + coefficients[0] + "; b = " + coefficients[1] +"; c = " + coefficients[2]);
 	}
+	 */
 
 	public double[] getCoefficients() {
 		return new double[] { this.coefficients[0], this.coefficients[1], this.coefficients[2] };
@@ -240,7 +240,8 @@ public class HeuristicPlayer extends AiPlayer {
 		final double[] previousSignals = this.signals;
 		this.storeSignalValues(best);
 
-		Evaluator.updateQ(this.getPlayer(), previousSignals, this.signals);
+		final double reward = Evaluator.reward(best);
+		Evaluator.updateQ(reward, previousSignals, this.signals);
 
 		return best;
 	}

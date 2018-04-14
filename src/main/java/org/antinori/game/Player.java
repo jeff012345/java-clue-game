@@ -99,7 +99,7 @@ public class Player implements SerializableSFSType {
 	}
 
 	public boolean isCardInHand(final int type, final int id) {
-		final Card card = new Card(type, id);
+		final Card card = Card.getInstance(type, id);
 		return this.cardsInHand.contains(card);
 	}
 

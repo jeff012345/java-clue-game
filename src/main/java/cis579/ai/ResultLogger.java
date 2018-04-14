@@ -21,11 +21,11 @@ public class ResultLogger {
 	private static int turns = 1;
 
 	private static final HashMap<String, AtomicInteger> WINS_PER_SUSPECT = new HashMap<>();
-	private static final HashMap<Integer, Integer> TURNS_PER_GAME = new HashMap<>();
+	//private static final HashMap<Integer, Integer> TURNS_PER_GAME = new HashMap<>();
 
 	private static final Database database = Database.getInstance();
 
-	public static final boolean SHUFFLE_DECK = false;
+	public static final boolean SHUFFLE_DECK = true;
 
 	static {
 		reset();
@@ -61,7 +61,7 @@ public class ResultLogger {
 
 	public static void logResult(final Player player, final ArrayList<Card> accusation) {
 		WINS_PER_SUSPECT.get(player.getSuspectName()).incrementAndGet();
-		TURNS_PER_GAME.put(runs, turns);
+		//TURNS_PER_GAME.put(runs, turns);
 
 		CardTracker.reset();
 
@@ -77,8 +77,14 @@ public class ResultLogger {
 					+ ". Games per minute = " + Math.round(gamesPerMinute)
 					+ ". Remainging time = " + Math.round(remainingMinutes * 100D) / 100D + " min" );
 
-			System.out.println("Miss Scarlet win Percent = " + WINS_PER_SUSPECT.get(Card.SCARLET_NAME).get() / (double)runs);
+			final double winRatio = WINS_PER_SUSPECT.get(Card.SCARLET_NAME).get() / 250D;
+
+			System.out.println("Miss Scarlet win Percent = " + winRatio);
 			Evaluator.printTheta();
+
+			WINS_PER_SUSPECT.put(Card.SCARLET_NAME, new AtomicInteger(0));
+
+			database.logCoefficientResult(new ResultDE(Evaluator.getThetas(), winRatio, "scarlet " + runs));
 		}
 	}
 
@@ -115,7 +121,7 @@ public class ResultLogger {
 			database.logCoefficientResult(new ResultDE(heuristics, wins / MAX_RUNS, gameGuid));
 		}
 
-		int sum = 0;
+		/*int sum = 0;
 		Integer minRound = null;
 		Integer maxRound = null;
 		int min = Integer.MAX_VALUE;
@@ -138,7 +144,7 @@ public class ResultLogger {
 
 		System.out.println("Average Turns = " + Math.round(sum / TURNS_PER_GAME.size()));
 		System.out.println("Max Turns = " + max + " in round " + maxRound);
-		System.out.println("Min Turns = " + min + " in round " + minRound);
+		System.out.println("Min Turns = " + min + " in round " + minRound);*/
 
 		System.out.println("\n=====================================================================================");
 	}
