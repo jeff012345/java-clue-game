@@ -72,6 +72,11 @@ public abstract class AiPlayer {
 	public abstract void onPlayerNoCardsToShow(Player showingPlayer, List<Card> suggestion);
 
 	/**
+	 * called when the player has won
+	 */
+	public abstract void onGameOver();
+
+	/**
 	 * Assumes that the player has already decided to roll
 	 *
 	 * @param choices The possible locations that the player can go

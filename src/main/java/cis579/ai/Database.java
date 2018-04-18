@@ -18,6 +18,8 @@ public class Database {
 	private static final boolean TCP = false;
 	private static final String CONNECTION_STR = "jdbc:h2:~/results";
 
+	private static final String LOG_INSERT_STATMENT = "INSERT INTO TBL01_COEFFICIENT_LOG (success_rate, game_guid, a, b, c, d) VALUES (?,?,?,?,?,?)";
+
 	private static Database database = null;
 
 	private Connection connection;
@@ -99,14 +101,13 @@ public class Database {
 		try {
 			final double[] coeffs = result.getCoefficients();
 
-			final PreparedStatement s = this.connection.prepareStatement("INSERT INTO TBL01_COEFFICIENT_LOG (a, b, c, d, e, success_rate, game_guid) VALUES (?,?,?,?,?,?,?)");
-			s.setDouble(1, coeffs[0]);
-			s.setDouble(2, coeffs[1]);
-			s.setDouble(3, coeffs[2]);
-			s.setDouble(4, coeffs[3]);
-			s.setDouble(5, coeffs[4]);
-			s.setDouble(6, result.getSuccessRate());
-			s.setString(7, result.getGameGuid());
+			final PreparedStatement s = this.connection.prepareStatement(LOG_INSERT_STATMENT);
+			s.setDouble(1, result.getSuccessRate());
+			s.setString(2, result.getGameGuid());
+			s.setDouble(3, coeffs[0]);
+			s.setDouble(4, coeffs[1]);
+			s.setDouble(5, coeffs[2]);
+			s.setDouble(6, coeffs[3]);
 
 			final int cnt = s.executeUpdate();
 			if(cnt != 0) {
@@ -135,8 +136,7 @@ public class Database {
 						rs.getDouble("a"),
 						rs.getDouble("b"),
 						rs.getDouble("c"),
-						rs.getDouble("d"),
-						rs.getDouble("e")
+						rs.getDouble("d")
 				};
 
 				result = new ResultDE();

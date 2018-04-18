@@ -219,6 +219,9 @@ public class HeuristicPlayer extends AiPlayer {
 	}
 
 	private Card pickBestCard(final Set<Card> cards) {
+		if(cards.size() == 1)
+			return cards.stream().findFirst().get();
+
 		Card best = null;
 		double maxValue = -1;
 		double value;
@@ -240,10 +243,17 @@ public class HeuristicPlayer extends AiPlayer {
 		final double[] previousSignals = this.signals;
 		this.storeSignalValues(best);
 
-		final double reward = Evaluator.reward(best);
+		//final double reward = Evaluator.reward(best);
+		final double reward = Evaluator.reward(this.player);
 		Evaluator.updateQ(reward, previousSignals, this.signals);
 
 		return best;
+	}
+
+	@Override
+	public void onGameOver() {
+		final double reward = Evaluator.reward(this.player);
+		Evaluator.updateQ(reward, this.signals, null);
 	}
 
 	private void storeSignalValues(final Card card) {
