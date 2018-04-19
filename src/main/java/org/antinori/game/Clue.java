@@ -10,6 +10,7 @@ import static org.antinori.game.Card.TYPE_WEAPON;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -147,6 +148,8 @@ public class Clue extends SFSObject {
 		if (this.players == null || this.players.isEmpty()) {
 			throw new RuntimeException("Players is null.");
 		}
+
+		Collections.shuffle(this.players);
 
 		//deal the cards
 		int player_index = 0;

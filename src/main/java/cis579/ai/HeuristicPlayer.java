@@ -20,18 +20,9 @@ import org.antinori.game.Player;
 
 public class HeuristicPlayer extends AiPlayer {
 
-	//private static final Map<String, List<Double>> coefficientStore = new HashMap<>();
-
 	private static final Set<Card> DECK = new TreeSet<>();
 
 	static {
-		/*coefficientStore.put(Card.SCARLET_NAME, new ArrayList<Double>(3));
-		coefficientStore.put(Card.WHITE_NAME, new ArrayList<Double>(3));
-		coefficientStore.put(Card.PLUM_NAME, new ArrayList<Double>(3));
-		coefficientStore.put(Card.MUSTARD_NAME, new ArrayList<Double>(3));
-		coefficientStore.put(Card.PEACOCK_NAME, new ArrayList<Double>(3));
-		coefficientStore.put(Card.GREEN_NAME, new ArrayList<Double>(3));*/
-
 		// make deck of cards
 		for (int i = 0; i < NUM_ROOMS; i++) {
 			DECK.add(Card.getInstance(TYPE_ROOM, i));
@@ -44,17 +35,11 @@ public class HeuristicPlayer extends AiPlayer {
 		}
 	}
 
-	public static void resetCoefficients() {
-		/*for(final List<Double> coeffs : coefficientStore.values()) {
-			coeffs.clear();
-		}*/
-	}
-
 	// =======================================================================================================================================
 	// =======================================================================================================================================
 	// =======================================================================================================================================
 
-	private double[] coefficients = new double[3];
+	private double[] thetas;
 	private double[] signals = null;
 
 	private HashMap<Card, AtomicInteger> guessedButNotShown;
@@ -68,42 +53,11 @@ public class HeuristicPlayer extends AiPlayer {
 			this.guessedButNotShown.put(card, new AtomicInteger(0));
 		});
 
-		//this.determineCoefficients();
+		this.thetas = Evaluator.copyBestThetas();
 	}
 
-	/*
-	private void determineCoefficients() {
-		final List<Double> coeffs = coefficientStore.get(this.player.getSuspectName());
-		if(coeffs.isEmpty()) {
-			// no coefficients set for the suspect, so create them
-			//List<ResultDE> results = Database.getInstance().getAllResults();
-
-			final Random rand1 = new Random(UUID.randomUUID().getMostSignificantBits());
-			final Random rand2 = new Random(UUID.randomUUID().getLeastSignificantBits());
-			final Random rand3 = new Random(UUID.randomUUID().getMostSignificantBits());
-
-			this.coefficients[0] = rand1.nextInt(100) / 100d;
-			this.coefficients[1] = rand2.nextInt(100) / 100d;
-			this.coefficients[2] = rand3.nextInt(100) / 100d;
-
-			coeffs.add(this.coefficients[0]);
-			coeffs.add(this.coefficients[1]);
-			coeffs.add(this.coefficients[2]);
-
-			System.out.println("Reset coeffs: " + this.coefficients[0] + "," + this.coefficients[1] + "," + this.coefficients[2]);
-		} else {
-			// load existing
-			this.coefficients[0] = coeffs.get(0);
-			this.coefficients[1] = coeffs.get(1);
-			this.coefficients[2] = coeffs.get(2);
-		}
-
-		//System.out.println(this.player.getSuspectName() + "; a = " + coefficients[0] + "; b = " + coefficients[1] +"; c = " + coefficients[2]);
-	}
-	 */
-
-	public double[] getCoefficients() {
-		return new double[] { this.coefficients[0], this.coefficients[1], this.coefficients[2] };
+	public double[] getThetas() {
+		return this.thetas;
 	}
 
 	@Override
@@ -245,7 +199,7 @@ public class HeuristicPlayer extends AiPlayer {
 
 		//final double reward = Evaluator.reward(best);
 		final double reward = Evaluator.reward(this.player);
-		Evaluator.updateQ(reward, previousSignals, this.signals);
+		Evaluator.updateQ(this.thetas, reward, previousSignals, this.signals);
 
 		return best;
 	}
@@ -253,7 +207,7 @@ public class HeuristicPlayer extends AiPlayer {
 	@Override
 	public void onGameOver() {
 		final double reward = Evaluator.reward(this.player);
-		Evaluator.updateQ(reward, this.signals, null);
+		Evaluator.updateQ(this.thetas, reward, this.signals, null);
 	}
 
 	private void storeSignalValues(final Card card) {
@@ -265,7 +219,7 @@ public class HeuristicPlayer extends AiPlayer {
 
 	private double evaluateCard(final Card c) {
 		final double[] signals = this.calculateSignals(c);
-		return signals == null ? 0 : Evaluator.evaluate(signals);
+		return signals == null ? 0 : Evaluator.evaluate(this.thetas, signals);
 	}
 
 	private double[] calculateSignals(final Card card) {

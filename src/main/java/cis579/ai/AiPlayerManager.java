@@ -35,10 +35,9 @@ public class AiPlayerManager {
 		PLAYERS.clear();
 
 		PLAYERS.put(scarlet, PlayerType.HEURISTIC);
-
-		PLAYERS.put(plum, PlayerType.ONE_UNKNOWN);
-		PLAYERS.put(green, PlayerType.ONE_UNKNOWN);
-		PLAYERS.put(mustard, PlayerType.ONE_UNKNOWN);
+		PLAYERS.put(plum, PlayerType.HEURISTIC);
+		PLAYERS.put(green, PlayerType.HEURISTIC);
+		PLAYERS.put(mustard, PlayerType.HEURISTIC);
 
 		aiPlayers.clear();
 	}

@@ -17,6 +17,8 @@ public class ResultLogger {
 	private static final long START_TIME = System.currentTimeMillis();
 
 	private static final int MAX_RUNS = Integer.MAX_VALUE;
+	private static int GAME_SPLIT = 200;
+
 	private static int runs = 1;
 	private static int turns = 1;
 
@@ -28,7 +30,7 @@ public class ResultLogger {
 	public static final boolean SHUFFLE_DECK = true;
 
 	static {
-		reset();
+		resetWins();
 	}
 
 	public static void nextTurn() {
@@ -36,11 +38,9 @@ public class ResultLogger {
 	}
 
 	public static boolean runAgain() {
-		//return runs < MAX_RUNS)
-
 		if(runs % MAX_RUNS == 0) {
 			printResults();
-			reset();
+			resetWins();
 		}
 
 		AiPlayerManager.reset();
@@ -48,43 +48,54 @@ public class ResultLogger {
 		return true;
 	}
 
-	public static void reset() {
+	public static void resetWins() {
+		WINS_PER_SUSPECT.clear();
 		WINS_PER_SUSPECT.put(Card.SCARLET_NAME, new AtomicInteger(0));
 		WINS_PER_SUSPECT.put(Card.WHITE_NAME, new AtomicInteger(0));
 		WINS_PER_SUSPECT.put(Card.PLUM_NAME, new AtomicInteger(0));
 		WINS_PER_SUSPECT.put(Card.MUSTARD_NAME, new AtomicInteger(0));
 		WINS_PER_SUSPECT.put(Card.PEACOCK_NAME, new AtomicInteger(0));
 		WINS_PER_SUSPECT.put(Card.GREEN_NAME, new AtomicInteger(0));
-
-		HeuristicPlayer.resetCoefficients();
 	}
 
 	public static void logResult(final Player player, final ArrayList<Card> accusation) {
 		WINS_PER_SUSPECT.get(player.getSuspectName()).incrementAndGet();
-		//TURNS_PER_GAME.put(runs, turns);
 
 		CardTracker.reset();
-
-		final double minutesElasped = (System.currentTimeMillis() - START_TIME) / 60000D;
-		final double gamesPerMinute = runs < 5 ? -1 : runs / minutesElasped;
-		final double remainingMinutes = gamesPerMinute == -1 ? -1 : (MAX_RUNS - (runs % MAX_RUNS)) / gamesPerMinute;
 
 		runs++;
 		turns = 1;
 
-		if(runs % 250 == 0) {
+		if(runs % GAME_SPLIT == 0) {
+			final double minutesElasped = (System.currentTimeMillis() - START_TIME) / 60000d;
+			final double gamesPerMinute = runs < 5 ? -1 : runs / minutesElasped;
+			final double remainingMinutes = gamesPerMinute == -1 ? -1 : (MAX_RUNS - (runs % MAX_RUNS)) / gamesPerMinute;
+
 			System.out.println("Game " + (runs % MAX_RUNS) + " of " + MAX_RUNS
 					+ ". Games per minute = " + Math.round(gamesPerMinute)
 					+ ". Remainging time = " + Math.round(remainingMinutes * 100D) / 100D + " min" );
 
-			final double winRatio = WINS_PER_SUSPECT.get(Card.SCARLET_NAME).get() / 250D;
+			String bestPlayer = null;
+			int mostWins = -1;
+			for(final Entry<String, AtomicInteger> entry : WINS_PER_SUSPECT.entrySet()) {
+				if(entry.getValue().get() > mostWins) {
+					mostWins = entry.getValue().get();
+					bestPlayer = entry.getKey();
+				}
+			}
 
-			System.out.println("Miss Scarlet win Percent = " + winRatio);
-			Evaluator.printTheta();
+			final double winRatio = WINS_PER_SUSPECT.get(bestPlayer).get() / (double)GAME_SPLIT;
 
-			WINS_PER_SUSPECT.put(Card.SCARLET_NAME, new AtomicInteger(0));
+			System.out.println("Best Player " + bestPlayer + " with win Percent = " + winRatio);
+			Evaluator.printBestTheta();
 
-			database.logCoefficientResult(new ResultDE(Evaluator.getThetas(), winRatio, "scarlet " + runs));
+			final HeuristicPlayer aiPlayer = (HeuristicPlayer) AiPlayerManager.getPlayer(bestPlayer);
+			Evaluator.updateBestThetas(aiPlayer.getThetas());
+
+			resetWins();
+
+			database.logCoefficientResult(new ResultDE(Evaluator.copyBestThetas(), winRatio,
+					"best player = " + bestPlayer + "; total runs " + runs));
 		}
 	}
 
@@ -116,7 +127,7 @@ public class ResultLogger {
 			if(aiPlayer == null)
 				continue; // not playing
 
-			final double[] heuristics = aiPlayer.getCoefficients();
+			final double[] heuristics = aiPlayer.getThetas();
 
 			database.logCoefficientResult(new ResultDE(heuristics, wins / MAX_RUNS, gameGuid));
 		}

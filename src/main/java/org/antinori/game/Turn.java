@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import org.antinori.astar.Location;
 import org.antinori.multiplayer.MultiplayerFrame;
@@ -42,11 +43,18 @@ public class Turn {
 		ClueMain.mapView.setEnabled(false); // disable clicking on the map until
 		// they roll the dice
 
-		Collections.shuffle(players);
+		final List<Player> shuffledPlayers = new ArrayList<>(players);
+		Collections.shuffle(shuffledPlayers);
+
+		/*System.out.print("Player order: ");
+		for (final Player player : shuffledPlayers) {
+			System.out.print(player.getSuspectName() + ", ");
+		}
+		System.out.print("\n");*/
 
 		while (!this.gameOver) {
 
-			for (final Player player : players) {
+			for (final Player player : shuffledPlayers) {
 
 				if(player.hasMadeFalseAccusation())
 					continue;

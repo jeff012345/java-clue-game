@@ -82,7 +82,7 @@ public class ClueMain {
 	public static final RoomIconPlacement playerIconPlacement = new RoomIconPlacement();
 
 	public ClueMain() {
-		ResultLogger.reset();
+		ResultLogger.resetWins();
 
 		try {
 
