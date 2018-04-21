@@ -22,7 +22,7 @@ public class AiPlayerManager {
 	private static final Map<Player, AiPlayer> aiPlayers = new HashMap<>();
 
 	public enum PlayerType {
-		HEURISTIC, RANDOM, ONE_UNKNOWN
+		HEURISTIC, RANDOM, ONE_UNKNOWN, TRAINED_AI
 	};
 
 	private static final HashMap<Card, PlayerType> PLAYERS = new HashMap<>();
@@ -34,10 +34,10 @@ public class AiPlayerManager {
 	public static void reset() {
 		PLAYERS.clear();
 
-		PLAYERS.put(scarlet, PlayerType.HEURISTIC);
-		PLAYERS.put(plum, PlayerType.HEURISTIC);
-		PLAYERS.put(green, PlayerType.HEURISTIC);
-		PLAYERS.put(mustard, PlayerType.HEURISTIC);
+		PLAYERS.put(scarlet, PlayerType.ONE_UNKNOWN);
+		PLAYERS.put(plum, PlayerType.ONE_UNKNOWN);
+		PLAYERS.put(green, PlayerType.ONE_UNKNOWN);
+		PLAYERS.put(mustard, PlayerType.ONE_UNKNOWN);
 
 		aiPlayers.clear();
 	}
@@ -57,6 +57,9 @@ public class AiPlayerManager {
 
 		if(aiPlayer instanceof OneUnknownPlayer)
 			return PlayerType.ONE_UNKNOWN;
+
+		if(aiPlayer instanceof TrainedAi)
+			return PlayerType.TRAINED_AI;
 
 		throw new RuntimeException("Player type not initialized: " + aiPlayer.getClass().getSimpleName());
 	}
@@ -93,6 +96,9 @@ public class AiPlayerManager {
 			break;
 		case RANDOM:
 			newAi = new RandomPlayer(player);
+			break;
+		case TRAINED_AI:
+			newAi = new TrainedAi(player);
 			break;
 		default:
 			throw new RuntimeException("Player type not implemened: " + type.toString());

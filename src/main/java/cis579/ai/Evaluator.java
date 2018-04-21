@@ -21,7 +21,10 @@ public class Evaluator {
 	//private static double[] THETA = new double[] { 2.954352817910267, 4.8783863956041005, 1.4084074171327663, 9.248173642315347};
 
 	//private static double[] BEST_THETA = new double[] { 1.2771164328633122, 3.2279713197674047, 1.3851975715541371, 9.248173642315347};
-	private static double[] BEST_THETA = new double[] { 0.5, .1, .25, .8 };
+
+	// theta was playing versus itself
+	// 1.2771127255668693	3.228139469123818	1.3852325544391302	9.24851017909113
+	private static double[] BEST_THETA = new double[] { 1.2771127255668693, 3.228139469123818, 1.3852325544391302, 9.24851017909113 };
 
 	public static void updateQ(final double[] theta, final double reward, final double[] previousSignals, final double[] maxSignals) {
 		if(previousSignals == null)

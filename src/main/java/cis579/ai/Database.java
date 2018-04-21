@@ -18,7 +18,7 @@ public class Database {
 	private static final boolean TCP = false;
 	private static final String CONNECTION_STR = "jdbc:h2:~/results";
 
-	private static final String LOG_INSERT_STATMENT = "INSERT INTO TBL01_COEFFICIENT_LOG (success_rate, game_guid, a, b, c, d) VALUES (?,?,?,?,?,?)";
+	private static final String LOG_INSERT_STATMENT = "INSERT INTO TBL01_COEFFICIENT_LOG (success_rate, game_guid, player_type, a, b, c, d) VALUES (?,?,?,?,?,?,?)";
 
 	private static Database database = null;
 
@@ -77,7 +77,7 @@ public class Database {
 		this.connection.setAutoCommit(true);
 
 		final Statement s = this.connection.createStatement();
-		s.executeUpdate("CREATE TABLE IF NOT EXISTS TBL01_COEFFICIENT_LOG (id BIGINT auto_increment, a DOUBLE, b DOUBLE, c DOUBLE, d DOUBLE, e DOUBLE, success_rate DOUBLE, game_guid VARCHAR(100))");
+		s.executeUpdate("CREATE TABLE IF NOT EXISTS TBL01_COEFFICIENT_LOG (id BIGINT auto_increment, a DOUBLE, b DOUBLE, c DOUBLE, d DOUBLE, e DOUBLE, success_rate DOUBLE, game_guid VARCHAR(100), player_type VARCHAR(30))");
 		s.close();
 
 		System.out.println("DB initialized");
@@ -102,12 +102,15 @@ public class Database {
 			final double[] coeffs = result.getCoefficients();
 
 			final PreparedStatement s = this.connection.prepareStatement(LOG_INSERT_STATMENT);
-			s.setDouble(1, result.getSuccessRate());
-			s.setString(2, result.getGameGuid());
-			s.setDouble(3, coeffs[0]);
-			s.setDouble(4, coeffs[1]);
-			s.setDouble(5, coeffs[2]);
-			s.setDouble(6, coeffs[3]);
+
+			int i = 1;
+			s.setDouble(i++, result.getSuccessRate());
+			s.setString(i++, result.getGameGuid());
+			s.setString(i++, result.getPlayerType());
+			s.setDouble(i++, coeffs[0]);
+			s.setDouble(i++, coeffs[1]);
+			s.setDouble(i++, coeffs[2]);
+			s.setDouble(i++, coeffs.length > 3 ? coeffs[3] : 0d);
 
 			final int cnt = s.executeUpdate();
 			if(cnt != 0) {
