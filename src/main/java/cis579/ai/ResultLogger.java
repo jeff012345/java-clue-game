@@ -17,7 +17,7 @@ public class ResultLogger {
 	private static final long START_TIME = System.currentTimeMillis();
 
 	private static final int MAX_RUNS = Integer.MAX_VALUE;
-	private static int GAME_SPLIT = 2000;
+	private static int GAME_SPLIT = 250;
 
 	private static int runs = 1;
 	private static int turns = 1;

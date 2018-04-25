@@ -114,7 +114,7 @@ public class Database {
 
 			final int cnt = s.executeUpdate();
 			if(cnt != 0) {
-				System.out.println("Wrote result to DB");
+				//System.out.println("Wrote result to DB");
 			} else {
 				System.out.println("Result save to DB failed");
 			}

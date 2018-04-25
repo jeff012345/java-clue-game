@@ -34,7 +34,7 @@ public class AiPlayerManager {
 	public static void reset() {
 		PLAYERS.clear();
 
-		PLAYERS.put(scarlet, PlayerType.ONE_UNKNOWN);
+		PLAYERS.put(scarlet, PlayerType.TRAINED_AI);
 		PLAYERS.put(plum, PlayerType.ONE_UNKNOWN);
 		PLAYERS.put(green, PlayerType.ONE_UNKNOWN);
 		PLAYERS.put(mustard, PlayerType.ONE_UNKNOWN);

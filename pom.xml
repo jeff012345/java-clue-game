@@ -44,6 +44,14 @@
             <scope>system</scope>
     		<systemPath>${project.basedir}/lib/sfs2x-core.jar</systemPath>
         </dependency>
+        
+        <!-- <dependency>
+            <groupId>smartfox</groupId>
+            <artifactId>sfs2x-client-core</artifactId>
+            <version>1.0.1</version>
+            <scope>system</scope>
+    		<systemPath>${project.basedir}/lib/sfs2x-client-core.jar</systemPath>
+        </dependency> -->
 		
         <dependency>
             <groupId>com.google.collections</groupId>
